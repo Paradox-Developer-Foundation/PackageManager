@@ -1,0 +1,72 @@
+@hpm_HostAddress = https://localhost:7295/api
+
+GET {{hpm_HostAddress}}/packages/files?packageId=1&packageNormalizedName=examplepackage
+Accept: application/zip
+###
+GET {{hpm_HostAddress}}/packages
+Accept: application/json
+###
+GET {{hpm_HostAddress}}/packages/active
+Accept: application/json
+###
+GET {{hpm_HostAddress}}/packages
+Accept: application/json
+###
+POST {{hpm_HostAddress}}/packages/dev
+Content-Type: multipart/form-data; boundary=FileUploadBoundary
+
+--FileUploadBoundary
+Content-Disposition: form-data; name="File"; filename="example-module.zip"
+Content-Type: application/zip
+
+< ./testfiles/test.zip
+
+--FileUploadBoundary
+Content-Disposition: form-data; name="Name"
+Content-Type: text/plain
+
+MyExampleModule
+
+--FileUploadBoundary
+Content-Disposition: form-data; name="NormalizedName"
+Content-Type: text/plain
+
+myexamplemodule
+
+--FileUploadBoundary
+Content-Disposition: form-data; name="Version"
+Content-Type: text/plain
+
+1.2.3.4
+
+--FileUploadBoundary
+Content-Disposition: form-data; name="Description"
+Content-Type: text/plain
+
+This is a sample mod for testing
+
+--FileUploadBoundary
+Content-Disposition: form-data; name="License"
+Content-Type: text/plain
+
+MIT
+
+--FileUploadBoundary
+Content-Disposition: form-data; name="SHA256"
+Content-Type: text/plain
+
+053b00bd4069012b8cdd966d15ccb9de23a06bdc933151a68cd7b01b09d977f5
+
+--FileUploadBoundary
+Content-Disposition: form-data; name="IsActive"
+Content-Type: text/plain
+
+true
+
+--FileUploadBoundary
+Content-Disposition: form-data; name="Dependencies"
+Content-Type: text/plain
+
+examplepackage
+
+--FileUploadBoundary--
