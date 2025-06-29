@@ -84,7 +84,7 @@ public sealed partial class FileUploadViewModel
             throw new ValidationException("SHA256 不能为空");
         }
 
-        if (Sha256Regex().IsMatch(Sha256))
+        if (!Sha256Regex().IsMatch(Sha256))
         {
             throw new ValidationException("SHA256 格式不正确");
         }
