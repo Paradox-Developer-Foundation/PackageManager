@@ -14,11 +14,7 @@ public sealed class PackageRepository : IPackageRepository
 
     public async Task<IEnumerable<Package>> GetPackagesAsync(bool isActiveOnly = true)
     {
-        return await _context
-            .Packages.AsNoTracking()
-            .Where(p => !isActiveOnly || p.IsActive)
-            .OrderBy(p => p.NormalizedName)
-            .ToListAsync();
+        return await _context.Packages.AsNoTracking().Where(p => !isActiveOnly || p.IsActive).ToListAsync();
     }
 
     public async Task<Package> GetPackageAsync(
@@ -35,23 +31,29 @@ public sealed class PackageRepository : IPackageRepository
                 && p.NormalizedName == packageNormalizedName
             )
             .FirstOrDefaultAsync();
-        if (package == null)
+        if (package is null)
         {
             throw new KeyNotFoundException(packageId.ToString());
         }
         return package;
     }
 
-    public async Task CheckDependenciesAsync(IEnumerable<string> dependencies)
+    public async Task<bool> IsValidDependenciesAsync(IEnumerable<string> dependencies)
     {
-        foreach (var dependency in dependencies)
+        foreach (string dependency in dependencies)
         {
-            var exists = await _context.Packages.AsNoTracking().AnyAsync(p => p.NormalizedName == dependency);
-            if (!exists)
+            if (
+                !await _context
+                    .Packages.AsNoTracking()
+                    .Select(package => package.NormalizedName)
+                    .AnyAsync(normalizedName => normalizedName == dependency)
+            )
             {
-                throw new KeyNotFoundException($"依赖包 '{dependency}' 未找到");
+                return false;
             }
         }
+
+        return true;
     }
 
     public async Task AddPackageDownloadCountAsync(int packageId, string packageNormalizedName)

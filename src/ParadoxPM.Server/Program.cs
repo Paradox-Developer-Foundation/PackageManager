@@ -1,13 +1,17 @@
+using Microsoft.EntityFrameworkCore;
 using ParadoxPM.Server.Configurations;
 using ParadoxPM.Server.Models;
 using ParadoxPM.Server.Repositories;
-using Microsoft.EntityFrameworkCore;
+using ZLogger;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<PackageContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
+
+builder.Logging.ClearProviders();
+builder.Logging.AddZLoggerConsole();
 
 builder.Services.AddScoped<IPackageRepository, PackageRepository>();
 builder.Services.AddScoped<IFileRepository>(_ => new FileRepository(AppConfigurations.FilesPath));
@@ -40,6 +44,7 @@ using (var scope = app.Services.CreateScope())
                 Sha256 = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
                 UploadDate = DateTime.UtcNow,
                 IsActive = true,
+                Arch = "hoi4",
                 DownloadCount = 0,
                 FilePath = "1_examplepackage-0.1.zip",
             },
