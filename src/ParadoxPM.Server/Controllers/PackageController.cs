@@ -85,7 +85,7 @@ public sealed class PackagesController : ControllerBase
         }
         catch (FileNotFoundException ex)
         {
-            _logger.ZLogWarning(ex, $"包文件未找到, Name: {packageNormalizedName}, Name: {packageNormalizedName}");
+            _logger.ZLogWarning(ex, $"包文件未找到, Id: {packageId}, Name: {packageNormalizedName}");
             return StatusCode(500, "文件存储错误: 文件未找到");
         }
     }
