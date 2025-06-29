@@ -11,25 +11,27 @@ public sealed class FileRepository : IFileRepository
         _basePath = basePath;
     }
 
-    public async Task<Stream> GetFileAsync(string path)
+    public Task<Stream> GetFileAsync(string path)
     {
-        var fullPath = Path.Combine(_basePath, path);
+        string fullPath = Path.Combine(_basePath, path);
         if (!File.Exists(fullPath))
         {
             throw new FileNotFoundException();
         }
-        return await Task.FromResult(new FileStream(fullPath, FileMode.Open, FileAccess.Read));
+
+        return Task.FromResult<Stream>(new FileStream(fullPath, FileMode.Open, FileAccess.Read));
     }
 
-    public async Task<Stream> DeleteFileAsync(string path)
+    public Task<Stream> DeleteFileAsync(string path)
     {
-        var fullPath = Path.Combine(_basePath, path);
+        string fullPath = Path.Combine(_basePath, path);
         if (!File.Exists(fullPath))
         {
             throw new FileNotFoundException();
         }
         File.Delete(fullPath);
-        return await Task.FromResult(new MemoryStream());
+
+        return Task.FromResult<Stream>(new MemoryStream());
     }
 
     public async Task<Stream> UpdateFileAsync(string path, Stream fileStream)
@@ -38,12 +40,13 @@ public sealed class FileRepository : IFileRepository
         {
             fileStream.Position = 0;
         }
-        var fullPath = Path.Combine(_basePath, path);
+        string fullPath = Path.Combine(_basePath, path);
         await using (var file = new FileStream(fullPath, FileMode.Create, FileAccess.Write))
         {
             await fileStream.CopyToAsync(file);
         }
-        return await Task.FromResult(new MemoryStream());
+
+        return new MemoryStream();
     }
 
     public async Task<string> GetFileSha256Async(Stream fileStream)
@@ -54,6 +57,7 @@ public sealed class FileRepository : IFileRepository
         }
 
         byte[] hashBytes = await SHA3_256.HashDataAsync(fileStream);
+
         return Convert.ToHexString(hashBytes).ToLowerInvariant();
     }
 
@@ -63,7 +67,8 @@ public sealed class FileRepository : IFileRepository
         {
             fileStream.Position = 0;
         }
-        var fullPath = Path.Combine(_basePath, path);
+
+        string fullPath = Path.Combine(_basePath, path);
         Directory.CreateDirectory(Path.GetDirectoryName(fullPath) ?? string.Empty);
         await using var file = new FileStream(fullPath, FileMode.Create, FileAccess.Write);
         await fileStream.CopyToAsync(file);
