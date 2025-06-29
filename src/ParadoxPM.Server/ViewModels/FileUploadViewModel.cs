@@ -55,7 +55,7 @@ public sealed partial class FileUploadViewModel
             throw new ValidationException("名称不能为空");
         }
 
-        if (ValidNameRegex().IsMatch(Name) && !WhitespaceRegex().IsMatch(Name.Replace(" ", string.Empty)))
+        if (!ValidNameRegex().IsMatch(Name) || WhitespaceRegex().IsMatch(Name.Replace(" ", string.Empty)))
         {
             throw new ValidationException("名称不能包含空格或不可见字符");
         }
