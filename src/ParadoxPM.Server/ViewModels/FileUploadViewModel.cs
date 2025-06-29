@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace ParadoxPM.Server.ViewModels;
 
-public sealed class FileUploadViewModel
+public sealed partial class FileUploadViewModel
 {
     [Required]
     public required IFormFile File { get; set; }
@@ -32,7 +32,16 @@ public sealed class FileUploadViewModel
 
     public bool IsActive { get; set; } = true;
 
-    public string? Dependencies { get; set; }
+    public string Dependencies { get; set; } = string.Empty;
+
+    [GeneratedRegex("^[a-fA-F0-9]{64}$")]
+    private static partial Regex Sha256Regex();
+
+    [GeneratedRegex(@"^[\P{C}\s]*$")]
+    private static partial Regex NameRegex();
+
+    [GeneratedRegex(@"\s")]
+    private static partial Regex EmptyNameRegex();
 
     public void ValidCheck()
     {
@@ -45,9 +54,8 @@ public sealed class FileUploadViewModel
         {
             throw new ValidationException("名称不能为空");
         }
-        var str = Name;
-        var flag = Regex.IsMatch(str, @"^[\P{C}\s]*$") && !Regex.IsMatch(str.Replace(" ", ""), @"[\s]");
-        if (!flag)
+
+        if (!(NameRegex().IsMatch(Name) && !EmptyNameRegex().IsMatch(Name.Replace(" ", ""))))
         {
             throw new ValidationException("名称不能包含空格或不可见字符");
         }
@@ -56,9 +64,7 @@ public sealed class FileUploadViewModel
         {
             throw new ValidationException("规范名称不能为空");
         }
-        str = NormalizedName;
-        flag = Regex.IsMatch(str, @"^[a-z]*$");
-        if (!flag)
+        if (!NormalizedName.All(char.IsAsciiLetterLower))
         {
             throw new ValidationException("规范名称只能包含小写字母");
         }
@@ -68,9 +74,7 @@ public sealed class FileUploadViewModel
             throw new ValidationException("版本不能为空");
         }
 
-        str = Version;
-        flag = Regex.IsMatch(str, @"^(0|[1-9]\d*)(\.(0|[1-9]\d*)){1,3}$");
-        if (!flag)
+        if (!System.Version.TryParse(Version, out _))
         {
             throw new ValidationException("版本格式不正确，应为 x.y(.z(.e))");
         }
@@ -79,15 +83,17 @@ public sealed class FileUploadViewModel
         {
             throw new ValidationException("SHA256 不能为空");
         }
-        str = Sha256;
-        flag = Regex.IsMatch(str, @"^[a-fA-F0-9]{64}$");
-        if (!flag)
+
+        if (Sha256Regex().IsMatch(Sha256))
         {
             throw new ValidationException("SHA256 格式不正确");
         }
 
-        str = Dependencies ?? "";
-        if (str.Split('|').Any(s => !Regex.IsMatch(s, @"^[a-z]*$")))
+        if (
+            Dependencies
+                .Split('|', StringSplitOptions.RemoveEmptyEntries)
+                .Any(dependent => dependent.Any(char.IsAsciiLetterUpper))
+        )
         {
             throw new ValidationException("依赖项名称错误");
         }
