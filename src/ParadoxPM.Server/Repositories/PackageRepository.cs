@@ -42,10 +42,10 @@ public sealed class PackageRepository : IPackageRepository
     {
         foreach (string dependency in dependencies)
         {
-            // TODO: 能否优化性能?
             bool exists = await _context
                 .Packages.AsNoTracking()
-                .AnyAsync(p => p.NormalizedName == dependency);
+                .Select(package => package.NormalizedName)
+                .AnyAsync(normalizedName => normalizedName == dependency);
 
             if (!exists)
             {
