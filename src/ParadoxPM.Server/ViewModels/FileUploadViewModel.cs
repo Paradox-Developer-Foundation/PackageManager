@@ -38,10 +38,10 @@ public sealed partial class FileUploadViewModel
     private static partial Regex Sha256Regex();
 
     [GeneratedRegex(@"^[\P{C}\s]*$")]
-    private static partial Regex NameRegex();
+    private static partial Regex ValidNameRegex();
 
     [GeneratedRegex(@"\s")]
-    private static partial Regex EmptyNameRegex();
+    private static partial Regex WhitespaceRegex();
 
     public void ValidCheck()
     {
@@ -55,7 +55,7 @@ public sealed partial class FileUploadViewModel
             throw new ValidationException("名称不能为空");
         }
 
-        if (!(NameRegex().IsMatch(Name) && !EmptyNameRegex().IsMatch(Name.Replace(" ", ""))))
+        if (ValidNameRegex().IsMatch(Name) && !WhitespaceRegex().IsMatch(Name.Replace(" ", string.Empty)))
         {
             throw new ValidationException("名称不能包含空格或不可见字符");
         }
