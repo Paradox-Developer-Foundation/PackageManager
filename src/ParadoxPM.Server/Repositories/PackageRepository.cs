@@ -42,12 +42,12 @@ public sealed class PackageRepository : IPackageRepository
     {
         foreach (string dependency in dependencies)
         {
-            bool exists = await _context
-                .Packages.AsNoTracking()
-                .Select(package => package.NormalizedName)
-                .AnyAsync(normalizedName => normalizedName == dependency);
-
-            if (!exists)
+            if (
+                await _context
+                    .Packages.AsNoTracking()
+                    .Select(package => package.NormalizedName)
+                    .AnyAsync(normalizedName => normalizedName != dependency)
+            )
             {
                 return false;
             }
