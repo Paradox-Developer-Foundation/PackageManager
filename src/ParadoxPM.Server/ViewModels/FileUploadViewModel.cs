@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 
-namespace Hoi4PackageManager.ViewModels;
+namespace ParadoxPM.Server.ViewModels;
 
 public sealed class FileUploadViewModel
 {

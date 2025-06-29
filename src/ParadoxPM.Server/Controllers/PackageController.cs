@@ -1,11 +1,11 @@
 using System.ComponentModel.DataAnnotations;
-using Hoi4PackageManager.Models;
-using Hoi4PackageManager.Repositories;
-using Hoi4PackageManager.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using ParadoxPM.Server.Models;
+using ParadoxPM.Server.Repositories;
+using ParadoxPM.Server.ViewModels;
 
-namespace Hoi4PackageManager.Controllers;
+namespace ParadoxPM.Server.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

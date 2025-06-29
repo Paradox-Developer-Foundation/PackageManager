@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace Hoi4PackageManager.Models;
+namespace ParadoxPM.Server.Models;
 
 public sealed class PackageContext : DbContext
 {

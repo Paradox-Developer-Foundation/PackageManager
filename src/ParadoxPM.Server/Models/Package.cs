@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Hoi4PackageManager.Models;
+namespace ParadoxPM.Server.Models;
 
 [SuppressMessage("ReSharper", "PropertyCanBeMadeInitOnly.Global")]
 public sealed class Package

@@ -1,6 +1,6 @@
-using Hoi4PackageManager.Models;
+using ParadoxPM.Server.Models;
 
-namespace Hoi4PackageManager.Repositories;
+namespace ParadoxPM.Server.Repositories;
 
 public interface IPackageRepository
 {
