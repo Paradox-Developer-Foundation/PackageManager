@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Hoi4PackageManager.Models;
 
-public class PackageContext : DbContext
+public sealed class PackageContext : DbContext
 {
     public PackageContext(DbContextOptions<PackageContext> options)
         : base(options) { }

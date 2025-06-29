@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Hoi4PackageManager.Repositories;
 
-public class PackageRepository : IPackageRepository
+public sealed class PackageRepository : IPackageRepository
 {
     private readonly PackageContext _context;
 
@@ -46,9 +46,7 @@ public class PackageRepository : IPackageRepository
     {
         foreach (var dependency in dependencies)
         {
-            var exists = await _context
-                .Packages.AsNoTracking()
-                .AnyAsync(p => p.NormalizedName == dependency);
+            var exists = await _context.Packages.AsNoTracking().AnyAsync(p => p.NormalizedName == dependency);
             if (!exists)
             {
                 throw new KeyNotFoundException($"依赖包 '{dependency}' 未找到");

@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace Hoi4PackageManager.ViewModels;
 
-public class FileUploadViewModel
+public sealed class FileUploadViewModel
 {
     [Required]
     public required IFormFile File { get; set; }
@@ -46,8 +46,7 @@ public class FileUploadViewModel
             throw new ValidationException("名称不能为空");
         }
         var str = Name;
-        var flag =
-            Regex.IsMatch(str, @"^[\P{C}\s]*$") && !Regex.IsMatch(str.Replace(" ", ""), @"[\s]");
+        var flag = Regex.IsMatch(str, @"^[\P{C}\s]*$") && !Regex.IsMatch(str.Replace(" ", ""), @"[\s]");
         if (!flag)
         {
             throw new ValidationException("名称不能包含空格或不可见字符");
@@ -68,7 +67,6 @@ public class FileUploadViewModel
         {
             throw new ValidationException("版本不能为空");
         }
-        str = Version;
         flag = Regex.IsMatch(str, @"^(0|[1-9]\d*)(\.(0|[1-9]\d*)){1,3}$");
         if (!flag)
         {

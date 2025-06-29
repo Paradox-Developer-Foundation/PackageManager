@@ -9,7 +9,7 @@ namespace Hoi4PackageManager.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class PackagesController : ControllerBase
+public sealed class PackagesController : ControllerBase
 {
     private readonly IPackageRepository _packageRepository;
     private readonly IFileRepository _fileRepository;

@@ -2,7 +2,7 @@ using System.Security.Cryptography;
 
 namespace Hoi4PackageManager.Repositories;
 
-public class FileRepository : IFileRepository
+public sealed class FileRepository : IFileRepository
 {
     private readonly string _basePath;
 

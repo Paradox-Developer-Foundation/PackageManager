@@ -5,7 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace Hoi4PackageManager.Models;
 
 [SuppressMessage("ReSharper", "PropertyCanBeMadeInitOnly.Global")]
-public class Package
+public sealed class Package
 {
     public int Id { get; set; }
 
