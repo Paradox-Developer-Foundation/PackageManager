@@ -36,7 +36,7 @@ public sealed class FileUploadViewModel
 
     public void ValidCheck()
     {
-        if (File == null || File.Length == 0)
+        if (File is null || File.Length == 0)
         {
             throw new ValidationException("文件不能为空");
         }

@@ -31,7 +31,7 @@ public sealed class PackageRepository : IPackageRepository
                 && p.NormalizedName == packageNormalizedName
             )
             .FirstOrDefaultAsync();
-        if (package == null)
+        if (package is null)
         {
             throw new KeyNotFoundException(packageId.ToString());
         }
