@@ -46,6 +46,10 @@ public sealed class Package
     [Required]
     [MaxLength(64)]
     public required string FilePath { get; set; }
+    
+    [Required]
+    [MaxLength(10)]
+    public required string Arch { get; set; }
 
     public List<string> Dependencies { get; set; } = [];
 }

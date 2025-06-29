@@ -32,6 +32,10 @@ public sealed class FileUploadViewModel
 
     public bool IsActive { get; set; } = true;
 
+    [Required]
+    [MaxLength(10)]
+    public required string Arch { get; set; }
+
     public string? Dependencies { get; set; }
 
     public void ValidCheck()
