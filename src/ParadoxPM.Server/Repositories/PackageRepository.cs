@@ -14,11 +14,7 @@ public sealed class PackageRepository : IPackageRepository
 
     public async Task<IEnumerable<Package>> GetPackagesAsync(bool isActiveOnly = true)
     {
-        return await _context
-            .Packages.AsNoTracking()
-            .Where(p => !isActiveOnly || p.IsActive)
-            .OrderBy(p => p.NormalizedName)
-            .ToListAsync();
+        return await _context.Packages.AsNoTracking().Where(p => !isActiveOnly || p.IsActive).ToListAsync();
     }
 
     public async Task<Package> GetPackageAsync(
