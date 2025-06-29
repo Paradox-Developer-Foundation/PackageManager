@@ -28,8 +28,7 @@ public class FileUploadViewModel
 
     [Required]
     [MaxLength(64)]
-    // ReSharper disable once InconsistentNaming
-    public required string SHA256 { get; set; }
+    public required string Sha256 { get; set; }
 
     public bool IsActive { get; set; } = true;
 
@@ -76,11 +75,11 @@ public class FileUploadViewModel
             throw new ValidationException("版本格式不正确，应为 x.y(.z(.e))");
         }
 
-        if (string.IsNullOrWhiteSpace(SHA256))
+        if (string.IsNullOrWhiteSpace(Sha256))
         {
             throw new ValidationException("SHA256 不能为空");
         }
-        str = SHA256;
+        str = Sha256;
         flag = Regex.IsMatch(str, @"^[a-fA-F0-9]{64}$");
         if (!flag)
         {
