@@ -1,7 +1,3 @@
-using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
-
 namespace Hoi4PackageManager.Repositories;
 
 public interface IFileRepository
