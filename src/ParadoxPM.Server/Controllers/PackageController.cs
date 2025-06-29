@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ParadoxPM.Server.Models;
@@ -113,7 +112,7 @@ public sealed class PackagesController : ControllerBase
             string fileSha256 = await _fileRepository.GetFileSha256Async(fileStream);
             if (!fileSha256.Equals(model.Sha256, StringComparison.InvariantCultureIgnoreCase))
             {
-                throw new ValidationException("文件的 SHA256 校验失败");
+                return BadRequest("文件的 SHA256 校验失败");
             }
             var package = new Package
             {
@@ -147,10 +146,6 @@ public sealed class PackagesController : ControllerBase
             return StatusCode(500, $"文件存储错误: {ex.Message}");
         }
         catch (KeyNotFoundException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch (ValidationException ex)
         {
             return BadRequest(ex.Message);
         }
