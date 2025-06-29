@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using ParadoxPM.Server.Models;
 using ParadoxPM.Server.Repositories;
 using ParadoxPM.Server.ViewModels;
+using ZLogger;
 
 namespace ParadoxPM.Server.Controllers;
 
@@ -13,11 +14,17 @@ public sealed class PackagesController : ControllerBase
 {
     private readonly IPackageRepository _packageRepository;
     private readonly IFileRepository _fileRepository;
+    private readonly ILogger<PackagesController> _logger;
 
-    public PackagesController(IPackageRepository packageRepository, IFileRepository fileRepository)
+    public PackagesController(
+        IPackageRepository packageRepository,
+        IFileRepository fileRepository,
+        ILogger<PackagesController> logger
+    )
     {
         _packageRepository = packageRepository;
         _fileRepository = fileRepository;
+        _logger = logger;
     }
 
     // GET: api/packages
@@ -31,6 +38,7 @@ public sealed class PackagesController : ControllerBase
         }
         catch (DbUpdateException ex)
         {
+            _logger.LogError(ex, "获取所有包时发生错误");
             return StatusCode(500, $"数据库错误: {ex.Message}");
         }
     }
@@ -46,6 +54,7 @@ public sealed class PackagesController : ControllerBase
         }
         catch (DbUpdateException ex)
         {
+            _logger.LogError(ex, "获取活动包时发生错误");
             return StatusCode(500, $"数据库错误: {ex.Message}");
         }
     }
@@ -67,14 +76,17 @@ public sealed class PackagesController : ControllerBase
         }
         catch (DbUpdateException ex)
         {
+            _logger.LogError(ex, "获取包文件时发生错误");
             return StatusCode(500, $"数据库错误: {ex.Message}");
         }
         catch (KeyNotFoundException ex)
         {
+            _logger.ZLogWarning(ex, $"未找到包, Id: {packageId}, Name: {packageNormalizedName}");
             return NotFound(ex.Message);
         }
-        catch (FileNotFoundException)
+        catch (FileNotFoundException ex)
         {
+            _logger.ZLogWarning(ex, $"包文件未找到, Name: {packageNormalizedName}, Name: {packageNormalizedName}");
             return StatusCode(500, "文件存储错误: 文件未找到");
         }
     }

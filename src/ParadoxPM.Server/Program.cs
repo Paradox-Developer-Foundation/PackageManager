@@ -1,13 +1,17 @@
+using Microsoft.EntityFrameworkCore;
 using ParadoxPM.Server.Configurations;
 using ParadoxPM.Server.Models;
 using ParadoxPM.Server.Repositories;
-using Microsoft.EntityFrameworkCore;
+using ZLogger;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<PackageContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
+
+builder.Logging.ClearProviders();
+builder.Logging.AddZLoggerConsole();
 
 builder.Services.AddScoped<IPackageRepository, PackageRepository>();
 builder.Services.AddScoped<IFileRepository>(_ => new FileRepository(AppConfigurations.FilesPath));
