@@ -22,16 +22,26 @@ public sealed class PackagesController : ControllerBase
 
     // GET: api/packages
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Package>>> GetAllPackages()
+    public async Task<ActionResult<ApiResponse<IEnumerable<Package>>>> GetAllPackages()
     {
         try
         {
             var packages = await _packageRepository.GetPackagesAsync(isActiveOnly: false);
-            return Ok(packages);
+            return StatusCode(
+                StatusCodes.Status200OK,
+                new ApiResponse<IEnumerable<Package>>(StatusCodes.Status200OK, "请求成功", packages)
+            );
         }
         catch (DbUpdateException ex)
         {
-            return StatusCode(500, $"数据库错误: {ex.Message}");
+            return StatusCode(
+                StatusCodes.Status500InternalServerError,
+                new ApiResponse<object?>(
+                    StatusCodes.Status500InternalServerError,
+                    $"数据库错误: {ex.Message}",
+                    null
+                )
+            );
         }
     }
 
@@ -42,11 +52,21 @@ public sealed class PackagesController : ControllerBase
         try
         {
             var packages = await _packageRepository.GetPackagesAsync(isActiveOnly: true);
-            return Ok(packages);
+            return StatusCode(
+                StatusCodes.Status200OK,
+                new ApiResponse<IEnumerable<Package>>(StatusCodes.Status200OK, "请求成功", packages)
+            );
         }
         catch (DbUpdateException ex)
         {
-            return StatusCode(500, $"数据库错误: {ex.Message}");
+            return StatusCode(
+                StatusCodes.Status500InternalServerError,
+                new ApiResponse<object?>(
+                    StatusCodes.Status500InternalServerError,
+                    $"数据库错误: {ex.Message}",
+                    null
+                )
+            );
         }
     }
 
@@ -108,6 +128,7 @@ public sealed class PackagesController : ControllerBase
                 Sha256 = model.Sha256,
                 IsActive = model.IsActive,
                 FilePath = "",
+                Arch = model.Arch,
                 Dependencies = dependencyList,
             };
             await _packageRepository.AddPackageAsync(package);
