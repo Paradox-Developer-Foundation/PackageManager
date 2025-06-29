@@ -30,7 +30,7 @@ public sealed class Package
     public long Size { get; set; }
 
     /// <summary>
-    /// Sha3-256
+    /// Sha-256
     /// </summary>
     [Required]
     [Column(TypeName = "char(64)")]
