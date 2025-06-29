@@ -6,6 +6,5 @@ public interface IFileRepository
     Task<Stream> DeleteFileAsync(string path);
     Task<Stream> UpdateFileAsync(string path, Stream fileStream);
     Task SaveFileAsync(string path, Stream fileStream);
-    // ReSharper disable once InconsistentNaming
-    Task<string> GetFileSHA256Async(Stream fileStream);
+    Task<string> GetFileSha256Async(Stream fileStream);
 }

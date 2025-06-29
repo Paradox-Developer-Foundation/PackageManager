@@ -14,10 +14,7 @@ public class PackagesController : ControllerBase
     private readonly IPackageRepository _packageRepository;
     private readonly IFileRepository _fileRepository;
 
-    public PackagesController(
-        IPackageRepository packageRepository,
-        IFileRepository fileRepository
-    )
+    public PackagesController(IPackageRepository packageRepository, IFileRepository fileRepository)
     {
         _packageRepository = packageRepository;
         _fileRepository = fileRepository;
@@ -62,16 +59,10 @@ public class PackagesController : ControllerBase
     {
         try
         {
-            var package = await _packageRepository.GetPackageAsync(
-                packageId,
-                packageNormalizedName
-            );
+            var package = await _packageRepository.GetPackageAsync(packageId, packageNormalizedName);
             var filePath = package.FilePath;
             var fileStream = await _fileRepository.GetFileAsync(filePath);
-            await _packageRepository.AddPackageDownloadCountAsync(
-                packageId,
-                packageNormalizedName
-            );
+            await _packageRepository.AddPackageDownloadCountAsync(packageId, packageNormalizedName);
             return File(fileStream, "application/zip", Path.GetFileName(filePath));
         }
         catch (DbUpdateException ex)
@@ -97,15 +88,13 @@ public class PackagesController : ControllerBase
         {
             model.ValidCheck();
             var dependencyList =
-                model.Dependencies?.Split('|', StringSplitOptions.RemoveEmptyEntries).ToList()
-                ?? [];
+                model.Dependencies?.Split('|', StringSplitOptions.RemoveEmptyEntries).ToList() ?? [];
 
             await _packageRepository.CheckDependenciesAsync(dependencyList);
             // 检查文件SHA256
             var fileStream = model.File.OpenReadStream();
-            // ReSharper disable once InconsistentNaming
-            var fileSHA256 = await _fileRepository.GetFileSHA256Async(fileStream);
-            if (!fileSHA256.Equals(model.Sha256, StringComparison.InvariantCultureIgnoreCase))
+            string fileSha256 = await _fileRepository.GetFileSha256Async(fileStream);
+            if (!fileSha256.Equals(model.Sha256, StringComparison.InvariantCultureIgnoreCase))
             {
                 throw new ValidationException("文件的 SHA256 校验失败");
             }
@@ -122,10 +111,7 @@ public class PackagesController : ControllerBase
                 Dependencies = dependencyList,
             };
             await _packageRepository.AddPackageAsync(package);
-            package = await _packageRepository.GetPackageAsync(
-                package.Id,
-                package.NormalizedName
-            );
+            package = await _packageRepository.GetPackageAsync(package.Id, package.NormalizedName);
             package.FilePath = $"{package.Id}_{package.NormalizedName}-{package.Version}.zip";
             await _packageRepository.UpdatePackageAsync(package);
             await _fileRepository.SaveFileAsync(package.FilePath, model.File.OpenReadStream());

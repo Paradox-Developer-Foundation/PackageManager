@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+
 namespace Hoi4PackageManager.Repositories;
 
 public class FileRepository : IFileRepository
@@ -44,15 +46,14 @@ public class FileRepository : IFileRepository
         return await Task.FromResult(new MemoryStream());
     }
 
-    public async Task<string> GetFileSHA256Async(Stream fileStream)
+    public async Task<string> GetFileSha256Async(Stream fileStream)
     {
         if (fileStream.CanSeek)
         {
             fileStream.Position = 0;
         }
 
-        using var sha256 = System.Security.Cryptography.SHA256.Create();
-        byte[] hashBytes = await sha256.ComputeHashAsync(fileStream);
+        byte[] hashBytes = await SHA3_256.HashDataAsync(fileStream);
         return Convert.ToHexString(hashBytes).ToLowerInvariant();
     }
 

@@ -28,7 +28,10 @@ public class Package
     public string License { get; set; } = "";
 
     public long Size { get; set; }
-    
+
+    /// <summary>
+    /// Sha3-256
+    /// </summary>
     [Required]
     [Column(TypeName = "char(64)")]
     public required string Sha256 { get; set; }
