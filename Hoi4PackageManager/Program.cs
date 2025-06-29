@@ -1,14 +1,12 @@
-using System;
 using Hoi4PackageManager.Configurations;
 using Hoi4PackageManager.Models;
 using Hoi4PackageManager.Repositories;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<PackageContext>(options =>
-    options.UseSqlite($"Data Source={AppConfigurations.DbPath}")
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
 
 builder.Services.AddScoped<IPackageRepository, PackageRepository>();
@@ -39,7 +37,7 @@ using (var scope = app.Services.CreateScope())
                 Description = "Example Package.",
                 License = "MIT",
                 Size = 876,
-                SHA256 = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                Sha256 = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
                 UploadDate = DateTime.UtcNow,
                 IsActive = true,
                 DownloadCount = 0,

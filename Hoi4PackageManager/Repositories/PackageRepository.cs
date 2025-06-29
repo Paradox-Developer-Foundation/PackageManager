@@ -89,7 +89,7 @@ public class PackageRepository : IPackageRepository
                     .SetProperty(x => x.Description, x => updatePackage.Description)
                     .SetProperty(x => x.License, x => updatePackage.License)
                     .SetProperty(x => x.Size, x => updatePackage.Size)
-                    .SetProperty(x => x.SHA256, x => updatePackage.SHA256)
+                    .SetProperty(x => x.Sha256, x => updatePackage.Sha256)
                     .SetProperty(x => x.UploadDate, x => updatePackage.UploadDate)
                     .SetProperty(x => x.IsActive, x => updatePackage.IsActive)
                     .SetProperty(x => x.FilePath, x => updatePackage.FilePath)

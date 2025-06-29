@@ -109,7 +109,7 @@ namespace Hoi4PackageManager.Controllers
                 var fileStream = model.File.OpenReadStream();
                 // ReSharper disable once InconsistentNaming
                 var fileSHA256 = await _fileRepository.GetFileSHA256Async(fileStream);
-                if (!fileSHA256.Equals(model.SHA256, StringComparison.InvariantCultureIgnoreCase))
+                if (!fileSHA256.Equals(model.Sha256, StringComparison.InvariantCultureIgnoreCase))
                 {
                     throw new ValidationException("文件的 SHA256 校验失败");
                 }
@@ -120,7 +120,7 @@ namespace Hoi4PackageManager.Controllers
                     Version = model.Version,
                     Description = model.Description,
                     License = model.License,
-                    SHA256 = model.SHA256,
+                    Sha256 = model.Sha256,
                     IsActive = model.IsActive,
                     FilePath = "",
                     Dependencies = dependencyList,

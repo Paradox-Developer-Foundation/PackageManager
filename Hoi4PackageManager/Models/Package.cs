@@ -29,11 +29,10 @@ public class Package
     public string License { get; set; } = "";
 
     public long Size { get; set; }
-
+    
     [Required]
-    [MaxLength(64)]
-    // ReSharper disable once InconsistentNaming
-    public required string SHA256 { get; set; }
+    [Column(TypeName = "char(64)")]
+    public required string Sha256 { get; set; }
 
     public DateTime UploadDate { get; set; } = DateTime.UtcNow;
 
