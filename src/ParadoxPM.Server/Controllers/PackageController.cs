@@ -99,8 +99,9 @@ public sealed class PackagesController : ControllerBase
         try
         {
             model.ValidCheck();
-            var dependencyList =
-                model.Dependencies?.Split('|', StringSplitOptions.RemoveEmptyEntries).ToList() ?? [];
+            var dependencyList = model
+                .Dependencies.Split('|', StringSplitOptions.RemoveEmptyEntries)
+                .ToList();
 
             await _packageRepository.CheckDependenciesAsync(dependencyList);
             // 检查文件SHA256
