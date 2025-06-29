@@ -67,6 +67,8 @@ public sealed class FileUploadViewModel
         {
             throw new ValidationException("版本不能为空");
         }
+
+        str = Version;
         flag = Regex.IsMatch(str, @"^(0|[1-9]\d*)(\.(0|[1-9]\d*)){1,3}$");
         if (!flag)
         {
