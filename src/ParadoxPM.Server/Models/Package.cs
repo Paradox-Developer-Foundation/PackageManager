@@ -46,6 +46,13 @@ public sealed class Package
     [Required]
     [MaxLength(64)]
     public required string FilePath { get; set; }
+    
+    /// <summary>
+    /// 用于判断此包属于哪种游戏，如 "ck3" 为十字军之王Ⅲ, "eu4" 为欧陆风云Ⅳ等
+    /// </summary>
+    [Required]
+    [MaxLength(10)]
+    public required string Arch { get; set; }
 
     public List<string> Dependencies { get; set; } = [];
 }

@@ -32,7 +32,14 @@ public sealed partial class FileUploadViewModel
 
     public bool IsActive { get; set; } = true;
 
+
     public string Dependencies { get; set; } = string.Empty;
+
+    [Required]
+    [MaxLength(10)]
+    public required string Arch { get; set; }
+
+    public string? Dependencies { get; set; }
 
     [GeneratedRegex("^[a-fA-F0-9]{64}$")]
     private static partial Regex Sha256Regex();
