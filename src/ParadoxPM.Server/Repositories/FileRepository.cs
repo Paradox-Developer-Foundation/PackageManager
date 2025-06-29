@@ -56,7 +56,7 @@ public sealed class FileRepository : IFileRepository
             fileStream.Position = 0;
         }
 
-        byte[] hashBytes = await SHA3_256.HashDataAsync(fileStream);
+        byte[] hashBytes = await SHA256.HashDataAsync(fileStream);
 
         return Convert.ToHexString(hashBytes).ToLowerInvariant();
     }
