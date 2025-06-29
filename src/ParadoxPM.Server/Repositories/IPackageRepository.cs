@@ -19,16 +19,15 @@ public interface IPackageRepository
     /// <param name="isActiveOnly">是否只获取启用的包</param>
     /// <exception cref="KeyNotFoundException">未找到符合要求的包时抛出</exception>
     /// <returns>包</returns>
-    Task<Package> GetPackageAsync(
-        int packageId,
-        string packageNormalizedName,
-        bool isActiveOnly = true
-    );
+    Task<Package> GetPackageAsync(int packageId, string packageNormalizedName, bool isActiveOnly = true);
 
-    Task CheckDependenciesAsync(
-        IEnumerable<string> dependencies
-    );
-    
+    /// <summary>
+    /// 检查所有依赖项是否有效
+    /// </summary>
+    /// <param name="dependencies">依赖项</param>
+    /// <returns>如果任意一个依赖项无效, 返回<c>false</c>, 否则返回<c>true</c></returns>
+    Task<bool> IsValidDependenciesAsync(IEnumerable<string> dependencies);
+
     /// <summary>
     /// 增加包的下载计数
     /// </summary>

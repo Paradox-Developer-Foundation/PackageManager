@@ -103,7 +103,11 @@ public sealed class PackagesController : ControllerBase
                 .Dependencies.Split('|', StringSplitOptions.RemoveEmptyEntries)
                 .ToList();
 
-            await _packageRepository.CheckDependenciesAsync(dependencyList);
+            if (!await _packageRepository.IsValidDependenciesAsync(dependencyList))
+            {
+                return BadRequest("使用不存在的依赖项");
+            }
+
             // 检查文件SHA256
             var fileStream = model.File.OpenReadStream();
             string fileSha256 = await _fileRepository.GetFileSha256Async(fileStream);

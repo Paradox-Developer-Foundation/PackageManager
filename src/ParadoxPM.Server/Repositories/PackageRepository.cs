@@ -38,16 +38,22 @@ public sealed class PackageRepository : IPackageRepository
         return package;
     }
 
-    public async Task CheckDependenciesAsync(IEnumerable<string> dependencies)
+    public async Task<bool> IsValidDependenciesAsync(IEnumerable<string> dependencies)
     {
-        foreach (var dependency in dependencies)
+        foreach (string dependency in dependencies)
         {
-            var exists = await _context.Packages.AsNoTracking().AnyAsync(p => p.NormalizedName == dependency);
+            // TODO: 能否优化性能?
+            bool exists = await _context
+                .Packages.AsNoTracking()
+                .AnyAsync(p => p.NormalizedName == dependency);
+
             if (!exists)
             {
-                throw new KeyNotFoundException($"依赖包 '{dependency}' 未找到");
+                return false;
             }
         }
+
+        return true;
     }
 
     public async Task AddPackageDownloadCountAsync(int packageId, string packageNormalizedName)
