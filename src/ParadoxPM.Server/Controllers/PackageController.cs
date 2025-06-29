@@ -27,10 +27,7 @@ public sealed class PackagesController : ControllerBase
         try
         {
             var packages = await _packageRepository.GetPackagesAsync(isActiveOnly: false);
-            return StatusCode(
-                StatusCodes.Status200OK,
-                new ApiResponse<IEnumerable<Package>>(StatusCodes.Status200OK, "请求成功", packages)
-            );
+            return Ok(new ApiResponse<IEnumerable<Package>>(StatusCodes.Status200OK, "请求成功", packages));
         }
         catch (DbUpdateException ex)
         {
@@ -52,10 +49,7 @@ public sealed class PackagesController : ControllerBase
         try
         {
             var packages = await _packageRepository.GetPackagesAsync(isActiveOnly: true);
-            return StatusCode(
-                StatusCodes.Status200OK,
-                new ApiResponse<IEnumerable<Package>>(StatusCodes.Status200OK, "请求成功", packages)
-            );
+            return Ok(new ApiResponse<IEnumerable<Package>>(StatusCodes.Status200OK, "请求成功", packages));
         }
         catch (DbUpdateException ex)
         {
