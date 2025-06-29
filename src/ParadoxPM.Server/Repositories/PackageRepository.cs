@@ -43,10 +43,10 @@ public sealed class PackageRepository : IPackageRepository
         foreach (string dependency in dependencies)
         {
             if (
-                await _context
+                !await _context
                     .Packages.AsNoTracking()
                     .Select(package => package.NormalizedName)
-                    .AnyAsync(normalizedName => normalizedName != dependency)
+                    .AnyAsync(normalizedName => normalizedName == dependency)
             )
             {
                 return false;
