@@ -44,6 +44,7 @@ using (var scope = app.Services.CreateScope())
                 Sha256 = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
                 UploadDate = DateTime.UtcNow,
                 IsActive = true,
+                Arch = "hoi4",
                 DownloadCount = 0,
                 FilePath = "1_examplepackage-0.1.zip",
             },

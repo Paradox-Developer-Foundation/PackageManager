@@ -39,8 +39,6 @@ public sealed partial class FileUploadViewModel
     [MaxLength(10)]
     public required string Arch { get; set; }
 
-    public string? Dependencies { get; set; }
-
     [GeneratedRegex("^[a-fA-F0-9]{64}$")]
     private static partial Regex Sha256Regex();
 
