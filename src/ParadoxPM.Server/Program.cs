@@ -1,6 +1,6 @@
-using Hoi4PackageManager.Configurations;
-using Hoi4PackageManager.Models;
-using Hoi4PackageManager.Repositories;
+using ParadoxPM.Server.Configurations;
+using ParadoxPM.Server.Models;
+using ParadoxPM.Server.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);

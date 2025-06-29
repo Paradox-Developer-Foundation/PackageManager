@@ -1,4 +1,4 @@
-namespace Hoi4PackageManager.Configurations;
+namespace ParadoxPM.Server.Configurations;
 
 public static class AppConfigurations
 {

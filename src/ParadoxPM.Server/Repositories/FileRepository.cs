@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 
-namespace Hoi4PackageManager.Repositories;
+namespace ParadoxPM.Server.Repositories;
 
 public sealed class FileRepository : IFileRepository
 {
