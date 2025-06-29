@@ -1,8 +1,8 @@
 namespace ParadoxPM.Server.Models;
 
-public class ApiResponse<T>(int code, string msg, T data)
+public sealed class ApiResponse<T>(int code, string message, T data)
 {
     public int Code { get; set; } = code;
-    public string Msg { get; set; } = msg;
+    public string Message { get; set; } = message;
     public T Data { get; set; } = data;
 }
