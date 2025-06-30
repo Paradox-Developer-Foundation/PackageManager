@@ -111,7 +111,11 @@ public sealed class PackagesController : ControllerBase
     {
         try
         {
-            model.ValidCheck();
+            if (!model.IsValid(out var errorMessages))
+            {
+                return BadRequest(errorMessages);
+            }
+
             var dependencyList = model
                 .Dependencies.Split('|', StringSplitOptions.RemoveEmptyEntries)
                 .ToList();

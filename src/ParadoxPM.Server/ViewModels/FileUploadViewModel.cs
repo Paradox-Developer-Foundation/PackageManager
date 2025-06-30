@@ -32,7 +32,6 @@ public sealed partial class FileUploadViewModel
 
     public bool IsActive { get; set; } = true;
 
-
     public string Dependencies { get; set; } = string.Empty;
 
     [Required]
@@ -48,50 +47,52 @@ public sealed partial class FileUploadViewModel
     [GeneratedRegex(@"\s")]
     private static partial Regex WhitespaceRegex();
 
-    public void ValidCheck()
+    public bool IsValid(out IEnumerable<string> errorMessages)
     {
-        if (File is null || File.Length == 0)
+        var errorList = new List<string>();
+        if (File.Length == 0)
         {
-            throw new ValidationException("文件不能为空");
+            errorList.Add("文件不能为空");
         }
 
         if (string.IsNullOrWhiteSpace(Name))
         {
-            throw new ValidationException("名称不能为空");
+            errorList.Add("名称不能为空");
         }
 
         if (!ValidNameRegex().IsMatch(Name) || WhitespaceRegex().IsMatch(Name.Replace(" ", string.Empty)))
         {
-            throw new ValidationException("名称不能包含空格或不可见字符");
+            errorList.Add("名称不能包含空格或不可见字符");
         }
 
         if (string.IsNullOrWhiteSpace(NormalizedName))
         {
-            throw new ValidationException("规范名称不能为空");
+            errorList.Add("规范名称不能为空");
         }
+
         if (!NormalizedName.All(char.IsAsciiLetterLower))
         {
-            throw new ValidationException("规范名称只能包含小写字母");
+            errorList.Add("规范名称只能包含小写字母");
         }
 
         if (string.IsNullOrWhiteSpace(Version))
         {
-            throw new ValidationException("版本不能为空");
+            errorList.Add("版本不能为空");
         }
 
         if (!System.Version.TryParse(Version, out _))
         {
-            throw new ValidationException("版本格式不正确，应为 x.y(.z(.e))");
+            errorList.Add("版本格式不正确，应为 x.y(.z(.e))");
         }
 
         if (string.IsNullOrWhiteSpace(Sha256))
         {
-            throw new ValidationException("SHA256 不能为空");
+            errorList.Add("SHA256 不能为空");
         }
 
         if (!Sha256Regex().IsMatch(Sha256))
         {
-            throw new ValidationException("SHA256 格式不正确");
+            errorList.Add("SHA256 格式不正确");
         }
 
         if (
@@ -100,7 +101,10 @@ public sealed partial class FileUploadViewModel
                 .Any(dependent => dependent.Any(char.IsAsciiLetterUpper))
         )
         {
-            throw new ValidationException("依赖项名称错误");
+            errorList.Add("依赖项名称无效");
         }
+
+        errorMessages = errorList;
+        return errorList.Count == 0;
     }
 }
