@@ -104,8 +104,8 @@ public sealed class PackagesController : ControllerBase
         }
     }
 
-    // Post: api/packages/dev
-    [HttpPost("dev")]
+    // Post: api/packages/upload
+    [HttpPost("upload")]
     [Consumes("multipart/form-data")]
     public async Task<IActionResult> UploadFileWithData([FromForm] FileUploadViewModel model)
     {
@@ -132,6 +132,7 @@ public sealed class PackagesController : ControllerBase
             {
                 return BadRequest("文件的 SHA256 校验失败");
             }
+
             var package = new Package
             {
                 Name = model.Name,
@@ -143,13 +144,19 @@ public sealed class PackagesController : ControllerBase
                 IsActive = model.IsActive,
                 FilePath = "",
                 Arch = model.Arch,
-                Dependencies = dependencyList,
+                Dependencies = dependencyList
             };
-            await _packageRepository.AddPackageAsync(package);
-            package = await _packageRepository.GetPackageAsync(package.Id, package.NormalizedName);
+            int? id = await _packageRepository.GetNextIdAsync();
+            if (id is null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "无法获取下一个包 ID");
+            }
+
+            package.Id = id.Value;
             package.FilePath = $"{package.Id}_{package.NormalizedName}-{package.Version}.zip";
-            await _packageRepository.UpdatePackageAsync(package);
+            await _packageRepository.AddPackageAsync(package);
             await _fileRepository.SaveFileAsync(package.FilePath, model.File.OpenReadStream());
+
             return CreatedAtAction(
                 nameof(GetPackage),
                 new { packageId = package.Id, packageNormalizedName = package.NormalizedName },
@@ -167,6 +174,11 @@ public sealed class PackagesController : ControllerBase
         catch (KeyNotFoundException ex)
         {
             return BadRequest(ex.Message);
+        }
+        catch(Exception ex)
+        {
+            _logger.LogError(ex, "上传文件时发生错误");
+            return BadRequest("内部错误");
         }
     }
 }

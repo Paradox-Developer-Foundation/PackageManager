@@ -58,4 +58,6 @@ public interface IPackageRepository
     /// <param name="packageNormalizedName">包的规范化名称</param>
     /// <exception cref="KeyNotFoundException">未找到符合要求的包时抛出</exception>
     Task DeletePackageAsync(int packageId, string packageNormalizedName);
+
+    Task<int?> GetNextIdAsync();
 }
