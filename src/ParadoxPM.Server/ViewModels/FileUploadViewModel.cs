@@ -55,19 +55,9 @@ public sealed partial class FileUploadViewModel
             errorList.Add("文件不能为空");
         }
 
-        if (string.IsNullOrWhiteSpace(Name))
-        {
-            errorList.Add("名称不能为空");
-        }
-
         if (!ValidNameRegex().IsMatch(Name) || WhitespaceRegex().IsMatch(Name.Replace(" ", string.Empty)))
         {
             errorList.Add("名称不能包含空格或不可见字符");
-        }
-
-        if (string.IsNullOrWhiteSpace(NormalizedName))
-        {
-            errorList.Add("规范名称不能为空");
         }
 
         if (!NormalizedName.All(char.IsAsciiLetterLower))
@@ -75,19 +65,9 @@ public sealed partial class FileUploadViewModel
             errorList.Add("规范名称只能包含小写字母");
         }
 
-        if (string.IsNullOrWhiteSpace(Version))
-        {
-            errorList.Add("版本不能为空");
-        }
-
         if (!System.Version.TryParse(Version, out _))
         {
             errorList.Add("版本格式不正确，应为 x.y(.z(.e))");
-        }
-
-        if (string.IsNullOrWhiteSpace(Sha256))
-        {
-            errorList.Add("SHA256 不能为空");
         }
 
         if (!Sha256Regex().IsMatch(Sha256))
