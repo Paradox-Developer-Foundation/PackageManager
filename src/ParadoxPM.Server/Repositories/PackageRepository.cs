@@ -6,12 +6,10 @@ namespace ParadoxPM.Server.Repositories;
 public sealed class PackageRepository : IPackageRepository
 {
     private readonly PackageContext _context;
-    private readonly ILogger<PackageRepository> _logger;
 
-    public PackageRepository(PackageContext context, ILogger<PackageRepository> logger)
+    public PackageRepository(PackageContext context)
     {
         _context = context;
-        _logger = logger;
     }
 
     public async Task<IEnumerable<Package>> GetPackagesAsync(bool isActiveOnly = true)
@@ -114,18 +112,10 @@ public sealed class PackageRepository : IPackageRepository
 
     public async Task<int?> GetNextIdAsync()
     {
-        try
-        {
-            return (
-                await _context
-                    .Database.SqlQueryRaw<int>("SELECT nextval('public.\"Packages_Id_seq\"')")
-                    .ToArrayAsync()
-            ).First();
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "获取下一个包 ID 时发生错误");
-            return null;
-        }
+        int[] array = await _context
+            .Database.SqlQueryRaw<int>("SELECT nextval('public.\"Packages_Id_seq\"')")
+            .ToArrayAsync();
+
+        return array.Length == 0 ? null : array[0];
     }
 }
