@@ -76,22 +76,22 @@ public sealed class PackageRepository : IPackageRepository
 
     public async Task UpdatePackageAsync(Package updatePackage)
     {
-        ArgumentNullException.ThrowIfNull(updatePackage);
-        var affectedRows = await _context
+        int affectedRows = await _context
             .Packages.Where(p => p.Id == updatePackage.Id)
             .ExecuteUpdateAsync(p =>
-                p.SetProperty(x => x.Name, x => updatePackage.Name)
-                    .SetProperty(x => x.NormalizedName, x => updatePackage.NormalizedName)
-                    .SetProperty(x => x.Version, x => updatePackage.Version)
-                    .SetProperty(x => x.Description, x => updatePackage.Description)
-                    .SetProperty(x => x.License, x => updatePackage.License)
-                    .SetProperty(x => x.Size, x => updatePackage.Size)
-                    .SetProperty(x => x.Sha256, x => updatePackage.Sha256)
-                    .SetProperty(x => x.UploadDate, x => updatePackage.UploadDate)
-                    .SetProperty(x => x.IsActive, x => updatePackage.IsActive)
-                    .SetProperty(x => x.FilePath, x => updatePackage.FilePath)
-                    .SetProperty(x => x.Dependencies, x => updatePackage.Dependencies)
+                p.SetProperty(x => x.Name, updatePackage.Name)
+                    .SetProperty(x => x.NormalizedName, updatePackage.NormalizedName)
+                    .SetProperty(x => x.Version, updatePackage.Version)
+                    .SetProperty(x => x.Description, updatePackage.Description)
+                    .SetProperty(x => x.License, updatePackage.License)
+                    .SetProperty(x => x.Size, updatePackage.Size)
+                    .SetProperty(x => x.Sha256, updatePackage.Sha256)
+                    .SetProperty(x => x.UploadDate, updatePackage.UploadDate)
+                    .SetProperty(x => x.IsActive, updatePackage.IsActive)
+                    .SetProperty(x => x.FilePath, updatePackage.FilePath)
+                    .SetProperty(x => x.Dependencies, updatePackage.Dependencies)
             );
+
         if (affectedRows == 0)
         {
             throw new KeyNotFoundException();
