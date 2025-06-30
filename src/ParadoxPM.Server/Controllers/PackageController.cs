@@ -90,7 +90,7 @@ public sealed class PackagesController : ControllerBase
         catch (DbUpdateException ex)
         {
             _logger.LogError(ex, "获取包文件时发生错误");
-            return StatusCode(500, $"数据库错误: {ex.Message}");
+            return StatusCode(StatusCodes.Status500InternalServerError, $"数据库错误: {ex.Message}");
         }
         catch (KeyNotFoundException ex)
         {
@@ -100,7 +100,7 @@ public sealed class PackagesController : ControllerBase
         catch (FileNotFoundException ex)
         {
             _logger.ZLogWarning(ex, $"包文件未找到, Id: {packageId}, Name: {packageNormalizedName}");
-            return StatusCode(500, "文件存储错误: 文件未找到");
+            return StatusCode(StatusCodes.Status500InternalServerError, "文件存储错误: 文件未找到");
         }
     }
 
@@ -158,11 +158,11 @@ public sealed class PackagesController : ControllerBase
         }
         catch (DbUpdateException ex)
         {
-            return StatusCode(500, $"数据库错误: {ex.Message}");
+            return StatusCode(StatusCodes.Status500InternalServerError, $"数据库错误: {ex.Message}");
         }
         catch (IOException ex)
         {
-            return StatusCode(500, $"文件存储错误: {ex.Message}");
+            return StatusCode(StatusCodes.Status500InternalServerError, $"文件存储错误: {ex.Message}");
         }
         catch (KeyNotFoundException ex)
         {
