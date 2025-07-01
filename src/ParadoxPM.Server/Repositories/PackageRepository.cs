@@ -17,20 +17,14 @@ public sealed class PackageRepository : IPackageRepository
         return await _context.Packages.AsNoTracking().Where(p => !isActiveOnly || p.IsActive).ToListAsync();
     }
 
-    public async Task<Package> GetPackageAsync(
-        int packageId,
-        string packageNormalizedName,
-        bool isActiveOnly = true
-    )
+    public async Task<Package> GetPackageAsync(int packageId, string version, bool isActiveOnly = true)
     {
         var package = await _context
             .Packages.AsNoTracking()
-            .Where(p =>
-                (!isActiveOnly || p.IsActive)
-                && p.Id == packageId
-                && p.NormalizedName == packageNormalizedName
-            )
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(p =>
+                (!isActiveOnly || p.IsActive) && p.Id == packageId && p.Version == version
+            );
+
         if (package is null)
         {
             throw new KeyNotFoundException(packageId.ToString());
@@ -56,11 +50,13 @@ public sealed class PackageRepository : IPackageRepository
         return true;
     }
 
-    public async Task AddPackageDownloadCountAsync(int packageId, string packageNormalizedName)
+    public async Task AddPackageDownloadCountAsync(int packageId, string version)
     {
-        var affectedRows = await _context
-            .Packages.Where(p => p.Id == packageId && p.NormalizedName == packageNormalizedName)
-            .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadCount, x => x.DownloadCount + 1));
+        int affectedRows = await _context
+            .Packages.Where(p => p.Id == packageId && p.Version == version)
+            .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadCount, x => x.DownloadCount + 1))
+            .ConfigureAwait(false);
+
         if (affectedRows == 0)
         {
             throw new KeyNotFoundException();
@@ -76,22 +72,22 @@ public sealed class PackageRepository : IPackageRepository
 
     public async Task UpdatePackageAsync(Package updatePackage)
     {
-        ArgumentNullException.ThrowIfNull(updatePackage);
-        var affectedRows = await _context
+        int affectedRows = await _context
             .Packages.Where(p => p.Id == updatePackage.Id)
             .ExecuteUpdateAsync(p =>
-                p.SetProperty(x => x.Name, x => updatePackage.Name)
-                    .SetProperty(x => x.NormalizedName, x => updatePackage.NormalizedName)
-                    .SetProperty(x => x.Version, x => updatePackage.Version)
-                    .SetProperty(x => x.Description, x => updatePackage.Description)
-                    .SetProperty(x => x.License, x => updatePackage.License)
-                    .SetProperty(x => x.Size, x => updatePackage.Size)
-                    .SetProperty(x => x.Sha256, x => updatePackage.Sha256)
-                    .SetProperty(x => x.UploadDate, x => updatePackage.UploadDate)
-                    .SetProperty(x => x.IsActive, x => updatePackage.IsActive)
-                    .SetProperty(x => x.FilePath, x => updatePackage.FilePath)
-                    .SetProperty(x => x.Dependencies, x => updatePackage.Dependencies)
+                p.SetProperty(x => x.Name, updatePackage.Name)
+                    .SetProperty(x => x.NormalizedName, updatePackage.NormalizedName)
+                    .SetProperty(x => x.Version, updatePackage.Version)
+                    .SetProperty(x => x.Description, updatePackage.Description)
+                    .SetProperty(x => x.License, updatePackage.License)
+                    .SetProperty(x => x.Size, updatePackage.Size)
+                    .SetProperty(x => x.Sha256, updatePackage.Sha256)
+                    .SetProperty(x => x.UploadDate, updatePackage.UploadDate)
+                    .SetProperty(x => x.IsActive, updatePackage.IsActive)
+                    .SetProperty(x => x.FilePath, updatePackage.FilePath)
+                    .SetProperty(x => x.Dependencies, updatePackage.Dependencies)
             );
+
         if (affectedRows == 0)
         {
             throw new KeyNotFoundException();
@@ -108,5 +104,14 @@ public sealed class PackageRepository : IPackageRepository
         {
             throw new KeyNotFoundException();
         }
+    }
+
+    public async Task<int?> GetNextIdAsync()
+    {
+        int[] array = await _context
+            .Database.SqlQueryRaw<int>("SELECT nextval('public.\"Packages_Id_seq\"')")
+            .ToArrayAsync();
+
+        return array.Length == 0 ? null : array[0];
     }
 }

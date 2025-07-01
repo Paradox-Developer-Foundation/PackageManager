@@ -76,42 +76,46 @@ public sealed class PackagesController : ControllerBase
     [HttpGet("files")]
     public async Task<ActionResult<IEnumerable<string>>> GetPackage(
         [FromQuery] int packageId,
-        [FromQuery] string packageNormalizedName
+        [FromQuery] string version
     )
     {
         try
         {
-            var package = await _packageRepository.GetPackageAsync(packageId, packageNormalizedName);
-            var filePath = package.FilePath;
+            var package = await _packageRepository.GetPackageAsync(packageId, version);
+            string filePath = package.FilePath;
             var fileStream = await _fileRepository.GetFileAsync(filePath);
-            await _packageRepository.AddPackageDownloadCountAsync(packageId, packageNormalizedName);
+            await _packageRepository.AddPackageDownloadCountAsync(packageId, version);
             return File(fileStream, "application/zip", Path.GetFileName(filePath));
         }
         catch (DbUpdateException ex)
         {
-            _logger.LogError(ex, "获取包文件时发生错误");
-            return StatusCode(500, $"数据库错误: {ex.Message}");
+            _logger.ZLogWarning(ex, $"获取包文件时发生错误, Id: {packageId}, Version: {version}");
+            return StatusCode(StatusCodes.Status500InternalServerError, $"数据库错误: {ex.Message}");
         }
         catch (KeyNotFoundException ex)
         {
-            _logger.ZLogWarning(ex, $"未找到包, Id: {packageId}, Name: {packageNormalizedName}");
+            _logger.ZLogWarning(ex, $"未找到包, Id: {packageId}, Version: {version}");
             return NotFound(ex.Message);
         }
         catch (FileNotFoundException ex)
         {
-            _logger.ZLogWarning(ex, $"包文件未找到, Id: {packageId}, Name: {packageNormalizedName}");
-            return StatusCode(500, "文件存储错误: 文件未找到");
+            _logger.ZLogWarning(ex, $"包文件未找到, Id: {packageId}, Version: {version}");
+            return StatusCode(StatusCodes.Status500InternalServerError, "文件存储错误: 文件未找到");
         }
     }
 
-    // Post: api/packages/dev
-    [HttpPost("dev")]
+    // Post: api/packages/upload
+    [HttpPost("upload")]
     [Consumes("multipart/form-data")]
     public async Task<IActionResult> UploadFileWithData([FromForm] FileUploadViewModel model)
     {
         try
         {
-            model.ValidCheck();
+            if (!model.IsValid(out var errorMessages))
+            {
+                return BadRequest(errorMessages);
+            }
+
             var dependencyList = model
                 .Dependencies.Split('|', StringSplitOptions.RemoveEmptyEntries)
                 .ToList();
@@ -128,6 +132,7 @@ public sealed class PackagesController : ControllerBase
             {
                 return BadRequest("文件的 SHA256 校验失败");
             }
+
             var package = new Package
             {
                 Name = model.Name,
@@ -139,13 +144,19 @@ public sealed class PackagesController : ControllerBase
                 IsActive = model.IsActive,
                 FilePath = "",
                 Arch = model.Arch,
-                Dependencies = dependencyList,
+                Dependencies = dependencyList
             };
-            await _packageRepository.AddPackageAsync(package);
-            package = await _packageRepository.GetPackageAsync(package.Id, package.NormalizedName);
+            int? id = await _packageRepository.GetNextIdAsync();
+            if (id is null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "无法获取下一个包 ID");
+            }
+
+            package.Id = id.Value;
             package.FilePath = $"{package.Id}_{package.NormalizedName}-{package.Version}.zip";
-            await _packageRepository.UpdatePackageAsync(package);
+            await _packageRepository.AddPackageAsync(package);
             await _fileRepository.SaveFileAsync(package.FilePath, model.File.OpenReadStream());
+
             return CreatedAtAction(
                 nameof(GetPackage),
                 new { packageId = package.Id, packageNormalizedName = package.NormalizedName },
@@ -154,15 +165,20 @@ public sealed class PackagesController : ControllerBase
         }
         catch (DbUpdateException ex)
         {
-            return StatusCode(500, $"数据库错误: {ex.Message}");
+            return StatusCode(StatusCodes.Status500InternalServerError, $"数据库错误: {ex.Message}");
         }
         catch (IOException ex)
         {
-            return StatusCode(500, $"文件存储错误: {ex.Message}");
+            return StatusCode(StatusCodes.Status500InternalServerError, $"文件存储错误: {ex.Message}");
         }
         catch (KeyNotFoundException ex)
         {
             return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "上传文件时发生错误");
+            return BadRequest("内部错误");
         }
     }
 }
