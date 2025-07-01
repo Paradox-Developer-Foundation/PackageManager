@@ -187,7 +187,7 @@ public sealed class PackagesController : ControllerBase
             };
 
             await _packageRepository.AddPackageAsync(package);
-            await _fileRepository.SaveFileAsync(version.Tarball, model.File.OpenReadStream());
+            await _fileRepository.SaveFileAsync(version.Tarball, fileStream);
 
             return CreatedAtAction(
                 nameof(GetAllPackages),
