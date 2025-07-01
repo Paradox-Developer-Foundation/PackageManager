@@ -73,6 +73,34 @@ public sealed class PackagesController : ControllerBase
         }
     }
 
+    // GET: api/packages/{packageId}
+    [HttpGet("{id:int}")]
+    public async Task<ActionResult<ApiResponse<Package>>> GetPackage(int id)
+    {
+        try
+        {
+            var package = await _packageRepository.GetPackageAsync(id);
+            return Ok(new ApiResponse<Package>(StatusCodes.Status200OK, "请求成功", package));
+        }
+        catch (KeyNotFoundException ex)
+        {
+            _logger.LogWarning(ex, "未找到包, Id: {PackageId}", id);
+            return NotFound(new ApiResponse<object?>(StatusCodes.Status404NotFound, ex.Message, null));
+        }
+        catch (DbUpdateException ex)
+        {
+            _logger.LogError(ex, "获取包时发生数据库错误, Id: {PackageId}", id);
+            return StatusCode(
+                StatusCodes.Status500InternalServerError,
+                new ApiResponse<object?>(
+                    StatusCodes.Status500InternalServerError,
+                    $"数据库错误: {ex.Message}",
+                    null
+                )
+            );
+        }
+    }
+
     // POST: api/packages/upload
     [HttpPost("upload")]
     [Consumes("multipart/form-data")]
