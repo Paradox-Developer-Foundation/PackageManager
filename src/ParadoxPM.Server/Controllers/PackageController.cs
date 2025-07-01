@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ParadoxPM.Server.Models;
@@ -72,95 +73,98 @@ public sealed class PackagesController : ControllerBase
         }
     }
 
-    // Get: api/packages/files
-    [HttpGet("files")]
-    public async Task<ActionResult<IEnumerable<string>>> GetPackage(
-        [FromQuery] int packageId,
-        [FromQuery] string version
-    )
-    {
-        try
-        {
-            var package = await _packageRepository.GetPackageAsync(packageId, version);
-            string filePath = package.FilePath;
-            var fileStream = await _fileRepository.GetFileAsync(filePath);
-            await _packageRepository.AddPackageDownloadCountAsync(packageId, version);
-            return File(fileStream, "application/zip", Path.GetFileName(filePath));
-        }
-        catch (DbUpdateException ex)
-        {
-            _logger.ZLogWarning(ex, $"获取包文件时发生错误, Id: {packageId}, Version: {version}");
-            return StatusCode(StatusCodes.Status500InternalServerError, $"数据库错误: {ex.Message}");
-        }
-        catch (KeyNotFoundException ex)
-        {
-            _logger.ZLogWarning(ex, $"未找到包, Id: {packageId}, Version: {version}");
-            return NotFound(ex.Message);
-        }
-        catch (FileNotFoundException ex)
-        {
-            _logger.ZLogWarning(ex, $"包文件未找到, Id: {packageId}, Version: {version}");
-            return StatusCode(StatusCodes.Status500InternalServerError, "文件存储错误: 文件未找到");
-        }
-    }
-
-    // Post: api/packages/upload
+    // POST: api/packages/upload
     [HttpPost("upload")]
     [Consumes("multipart/form-data")]
-    public async Task<IActionResult> UploadFileWithData([FromForm] FileUploadViewModel model)
+    public async Task<ActionResult<ApiResponse<Package>>> UploadPackage([FromForm] FileUploadViewModel model)
     {
         try
         {
-            if (!model.IsValid(out var errorMessages))
+            var options = new JsonSerializerOptions
             {
-                return BadRequest(errorMessages);
+                PropertyNameCaseInsensitive = true,
+                AllowTrailingCommas = true,
+                ReadCommentHandling = JsonCommentHandling.Skip,
+            };
+
+            var packageInfo = JsonSerializer.Deserialize<PackageInfo>(model.PackageInfoJson, options)!;
+
+            if (!packageInfo.IsValid(out var errorMessages))
+            {
+                string combinedErrors = string.Join("; ", errorMessages);
+                return BadRequest(
+                    new ApiResponse<object?>(
+                        StatusCodes.Status400BadRequest,
+                        combinedErrors, // 使用合并后的错误字符串
+                        null
+                    )
+                );
             }
 
-            var dependencyList = model
-                .Dependencies.Split('|', StringSplitOptions.RemoveEmptyEntries)
-                .ToList();
+            var dependencyList = packageInfo.Dependencies;
 
             if (!await _packageRepository.IsValidDependenciesAsync(dependencyList))
             {
-                return BadRequest("使用不存在的依赖项");
+                return BadRequest(
+                    new ApiResponse<object?>(StatusCodes.Status400BadRequest, "使用不存在的依赖项", null)
+                );
             }
 
             // 检查文件SHA256
             var fileStream = model.File.OpenReadStream();
-            string fileSha256 = await _fileRepository.GetFileSha256Async(fileStream);
-            if (!fileSha256.Equals(model.Sha256, StringComparison.InvariantCultureIgnoreCase))
+            string fileSha256 = "sha256-" + await _fileRepository.GetFileSha256Async(fileStream);
+            if (!fileSha256.Equals(packageInfo.Integrity, StringComparison.InvariantCultureIgnoreCase))
             {
-                return BadRequest("文件的 SHA256 校验失败");
+                return BadRequest(
+                    new ApiResponse<object?>(StatusCodes.Status400BadRequest, "文件的 SHA256 校验失败", null)
+                );
             }
-
-            var package = new Package
-            {
-                Name = model.Name,
-                NormalizedName = model.NormalizedName.ToLowerInvariant(),
-                Version = model.Version,
-                Description = model.Description,
-                License = model.License,
-                Sha256 = model.Sha256,
-                IsActive = model.IsActive,
-                FilePath = "",
-                Arch = model.Arch,
-                Dependencies = dependencyList
-            };
             int? id = await _packageRepository.GetNextIdAsync();
             if (id is null)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "无法获取下一个包 ID");
             }
 
-            package.Id = id.Value;
-            package.FilePath = $"{package.Id}_{package.NormalizedName}-{package.Version}.zip";
+            var versions = new List<PackageVersion>();
+            var version = new PackageVersion
+            {
+                Version = packageInfo.Version,
+                Integrity = packageInfo.Integrity,
+                Tarball = $"{id.Value}-{packageInfo.NormalizedName}-{packageInfo.Version}.7z",
+                UploadTime = DateTime.UtcNow,
+                Dependencies = dependencyList
+                    .Select(d => new Dependency
+                    {
+                        DependencyId = d.DependencyId,
+                        NormalizedName = d.NormalizedName,
+                        MinVersion = d.MinVersion,
+                    })
+                    .ToList(),
+            };
+            versions.Add(version);
+
+            var package = new Package
+            {
+                Id = id.Value,
+                Name = packageInfo.Name,
+                NormalizedName = packageInfo.NormalizedName,
+                Description = packageInfo.Description,
+                Arch = packageInfo.Arch,
+                IsActive = false,
+                Author = packageInfo.Author,
+                License = packageInfo.License,
+                Repository = packageInfo.Repository,
+                Homepage = packageInfo.Homepage,
+                Versions = versions,
+            };
+
             await _packageRepository.AddPackageAsync(package);
-            await _fileRepository.SaveFileAsync(package.FilePath, model.File.OpenReadStream());
+            await _fileRepository.SaveFileAsync(version.Tarball, model.File.OpenReadStream());
 
             return CreatedAtAction(
-                nameof(GetPackage),
+                nameof(GetAllPackages),
                 new { packageId = package.Id, packageNormalizedName = package.NormalizedName },
-                package
+                new ApiResponse<Package>(StatusCodes.Status201Created, "包上传成功", package)
             );
         }
         catch (DbUpdateException ex)
@@ -175,10 +179,46 @@ public sealed class PackagesController : ControllerBase
         {
             return BadRequest(ex.Message);
         }
+        catch (JsonException ex)
+        {
+            return BadRequest($"Invalid JSON format: {ex.Message}");
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "上传文件时发生错误");
             return BadRequest("内部错误");
         }
     }
+
+    // Get: api/packages/files
+    // [HttpGet("files")]
+    // public async Task<ActionResult<IEnumerable<string>>> GetPackage(
+    //     [FromQuery] int packageId,
+    //     [FromQuery] string version
+    // )
+    // {
+    //     try
+    //     {
+    //         var package = await _packageRepository.GetPackageAsync(packageId, version);
+    //         string filePath = package.FilePath;
+    //         var fileStream = await _fileRepository.GetFileAsync(filePath);
+    //         await _packageRepository.AddPackageDownloadCountAsync(packageId, version);
+    //         return File(fileStream, "application/zip", Path.GetFileName(filePath));
+    //     }
+    //     catch (DbUpdateException ex)
+    //     {
+    //         _logger.ZLogWarning(ex, $"获取包文件时发生错误, Id: {packageId}, Version: {version}");
+    //         return StatusCode(StatusCodes.Status500InternalServerError, $"数据库错误: {ex.Message}");
+    //     }
+    //     catch (KeyNotFoundException ex)
+    //     {
+    //         _logger.ZLogWarning(ex, $"未找到包, Id: {packageId}, Version: {version}");
+    //         return NotFound(ex.Message);
+    //     }
+    //     catch (FileNotFoundException ex)
+    //     {
+    //         _logger.ZLogWarning(ex, $"包文件未找到, Id: {packageId}, Version: {version}");
+    //         return StatusCode(StatusCodes.Status500InternalServerError, "文件存储错误: 文件未找到");
+    //     }
+    // }
 }
