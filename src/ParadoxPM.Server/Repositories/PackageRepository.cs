@@ -20,6 +20,7 @@ public sealed class PackageRepository : IPackageRepository
     public async Task<Package> GetPackageAsync(
         int packageId,
         string packageNormalizedName,
+        string version,
         bool isActiveOnly = true
     )
     {
@@ -29,6 +30,7 @@ public sealed class PackageRepository : IPackageRepository
                 (!isActiveOnly || p.IsActive)
                 && p.Id == packageId
                 && p.NormalizedName == packageNormalizedName
+                && p.Version == version
             )
             .FirstOrDefaultAsync();
         if (package is null)
@@ -56,11 +58,19 @@ public sealed class PackageRepository : IPackageRepository
         return true;
     }
 
-    public async Task AddPackageDownloadCountAsync(int packageId, string packageNormalizedName)
+    public async Task AddPackageDownloadCountAsync(
+        int packageId,
+        string packageNormalizedName,
+        string version
+    )
     {
-        var affectedRows = await _context
-            .Packages.Where(p => p.Id == packageId && p.NormalizedName == packageNormalizedName)
-            .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadCount, x => x.DownloadCount + 1));
+        int affectedRows = await _context
+            .Packages.Where(p =>
+                p.Id == packageId && p.NormalizedName == packageNormalizedName && p.Version == version
+            )
+            .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadCount, x => x.DownloadCount + 1))
+            .ConfigureAwait(false);
+
         if (affectedRows == 0)
         {
             throw new KeyNotFoundException();

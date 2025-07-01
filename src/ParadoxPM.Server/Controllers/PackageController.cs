@@ -76,15 +76,16 @@ public sealed class PackagesController : ControllerBase
     [HttpGet("files")]
     public async Task<ActionResult<IEnumerable<string>>> GetPackage(
         [FromQuery] int packageId,
-        [FromQuery] string packageNormalizedName
+        [FromQuery] string packageNormalizedName,
+        [FromQuery] string version
     )
     {
         try
         {
-            var package = await _packageRepository.GetPackageAsync(packageId, packageNormalizedName);
-            var filePath = package.FilePath;
+            var package = await _packageRepository.GetPackageAsync(packageId, packageNormalizedName, version);
+            string filePath = package.FilePath;
             var fileStream = await _fileRepository.GetFileAsync(filePath);
-            await _packageRepository.AddPackageDownloadCountAsync(packageId, packageNormalizedName);
+            await _packageRepository.AddPackageDownloadCountAsync(packageId, packageNormalizedName, version);
             return File(fileStream, "application/zip", Path.GetFileName(filePath));
         }
         catch (DbUpdateException ex)
@@ -175,7 +176,7 @@ public sealed class PackagesController : ControllerBase
         {
             return BadRequest(ex.Message);
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             _logger.LogError(ex, "上传文件时发生错误");
             return BadRequest("内部错误");

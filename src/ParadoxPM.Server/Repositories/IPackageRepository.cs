@@ -16,10 +16,11 @@ public interface IPackageRepository
     /// </summary>
     /// <param name="packageId">包的序号</param>
     /// <param name="packageNormalizedName">包的规范化名称</param>
+    /// <param name="version">包的版本号</param>
     /// <param name="isActiveOnly">是否只获取启用的包</param>
     /// <exception cref="KeyNotFoundException">未找到符合要求的包时抛出</exception>
     /// <returns>包</returns>
-    Task<Package> GetPackageAsync(int packageId, string packageNormalizedName, bool isActiveOnly = true);
+    Task<Package> GetPackageAsync(int packageId, string packageNormalizedName, string version, bool isActiveOnly = true);
 
     /// <summary>
     /// 检查所有依赖项是否有效
@@ -33,8 +34,9 @@ public interface IPackageRepository
     /// </summary>
     /// <param name="packageId">包的序号</param>
     /// <param name="packageNormalizedName">包的规范化名称</param>
+    /// <param name="version"></param>
     /// <exception cref="KeyNotFoundException">未找到符合要求的包时抛出</exception>
-    Task AddPackageDownloadCountAsync(int packageId, string packageNormalizedName);
+    Task AddPackageDownloadCountAsync(int packageId, string packageNormalizedName, string version);
 
     /// <summary>
     /// 添加新的包
