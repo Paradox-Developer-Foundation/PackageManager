@@ -3,9 +3,17 @@
   "displayName": "ParadoxPM",
   "description": "",
   "version": "0.0.1",
+  "license": "Apache-2.0",
   "engines": {
     "vscode": "^1.90.0"
   },
+  "author": "Paradox Developer Foundation",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Paradox-Developer-Foundation/PackageManager"
+  },
+  "preview": true,
+  "type": "module",
   "categories": [
     "Other"
   ],
@@ -34,6 +42,7 @@
     "test": "vscode-test"
   },
   "devDependencies": {
+    "@tomjs/vite-plugin-vscode": "^4.2.1",
     "@types/mocha": "^10.0.10",
     "@types/node": "~20.19.2",
     "@types/vscode": "^1.101.0",
