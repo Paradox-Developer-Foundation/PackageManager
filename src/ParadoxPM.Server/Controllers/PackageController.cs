@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using ParadoxPM.Server.Models;
 using ParadoxPM.Server.Repositories;
 using ParadoxPM.Server.ViewModels;
-using ZLogger;
 
 namespace ParadoxPM.Server.Controllers;
 
