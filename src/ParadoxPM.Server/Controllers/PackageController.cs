@@ -16,6 +16,14 @@ public sealed class PackagesController : ControllerBase
     private readonly IFileRepository _fileRepository;
     private readonly ILogger<PackagesController> _logger;
 
+    private static readonly JsonSerializerOptions JsonOptions =
+        new()
+        {
+            PropertyNameCaseInsensitive = true,
+            AllowTrailingCommas = true,
+            ReadCommentHandling = JsonCommentHandling.Skip,
+        };
+
     public PackagesController(
         IPackageRepository packageRepository,
         IFileRepository fileRepository,
@@ -108,14 +116,12 @@ public sealed class PackagesController : ControllerBase
     {
         try
         {
-            var options = new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true,
-                AllowTrailingCommas = true,
-                ReadCommentHandling = JsonCommentHandling.Skip,
-            };
+            var packageInfo = JsonSerializer.Deserialize<PackageInfo>(model.PackageInfoJson, JsonOptions);
 
-            var packageInfo = JsonSerializer.Deserialize<PackageInfo>(model.PackageInfoJson, options)!;
+            if (packageInfo is null)
+            {
+                return BadRequest(new ApiResponse<object?>(StatusCodes.Status400BadRequest, "无效的包信息", null));
+            }
 
             if (!packageInfo.IsValid(out var errorMessages))
             {
