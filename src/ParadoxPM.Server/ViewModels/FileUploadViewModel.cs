@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 
@@ -60,17 +61,23 @@ public sealed partial class PackageInfo
 
     [GeneratedRegex(@"^[\P{C}\s]*$")]
     private static partial Regex ValidNameRegex();
-    
+
     [GeneratedRegex(@"^[a-z0-9]+$")]
     private static partial Regex ValidNormalizedNameRegex();
 
     [GeneratedRegex(@"\s")]
     private static partial Regex WhitespaceRegex();
 
-    private static List<string> ValidArchList()
-    {
-        return ["hoi4", "ck3", "eu4", "eu5", "st", "vic3", "csl", "csl2"];
-    }
+    private static readonly FrozenSet<string> ValidArchNameSet = FrozenSet.Create(
+        "hoi4",
+        "ck3",
+        "eu4",
+        "eu5",
+        "st",
+        "vic3",
+        "csl",
+        "csl2"
+    );
 
     public bool IsValid(out IEnumerable<string> errorMessages)
     {
@@ -96,7 +103,7 @@ public sealed partial class PackageInfo
             errorList.Add("SHA256 格式不正确");
         }
 
-        if (!ValidArchList().Contains(Arch))
+        if (!ValidArchNameSet.Contains(Arch))
         {
             errorList.Add("游戏类型不正确");
         }
