@@ -140,6 +140,10 @@ public sealed class PackagesController : ControllerBase
 
             // 检查文件SHA256
             var fileStream = model.File.OpenReadStream();
+            if (fileStream.CanSeek)
+            {
+                fileStream.Position = 0;
+            }
             string fileSha256 = "sha256-" + await _fileRepository.GetFileSha256Async(fileStream);
             if (!fileSha256.Equals(packageInfo.Integrity, StringComparison.InvariantCultureIgnoreCase))
             {
