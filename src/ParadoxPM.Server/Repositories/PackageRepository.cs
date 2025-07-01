@@ -17,22 +17,14 @@ public sealed class PackageRepository : IPackageRepository
         return await _context.Packages.AsNoTracking().Where(p => !isActiveOnly || p.IsActive).ToListAsync();
     }
 
-    public async Task<Package> GetPackageAsync(
-        int packageId,
-        string packageNormalizedName,
-        string version,
-        bool isActiveOnly = true
-    )
+    public async Task<Package> GetPackageAsync(int packageId, string version, bool isActiveOnly = true)
     {
         var package = await _context
             .Packages.AsNoTracking()
-            .Where(p =>
-                (!isActiveOnly || p.IsActive)
-                && p.Id == packageId
-                && p.NormalizedName == packageNormalizedName
-                && p.Version == version
-            )
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(p =>
+                (!isActiveOnly || p.IsActive) && p.Id == packageId && p.Version == version
+            );
+
         if (package is null)
         {
             throw new KeyNotFoundException(packageId.ToString());
@@ -58,16 +50,10 @@ public sealed class PackageRepository : IPackageRepository
         return true;
     }
 
-    public async Task AddPackageDownloadCountAsync(
-        int packageId,
-        string packageNormalizedName,
-        string version
-    )
+    public async Task AddPackageDownloadCountAsync(int packageId, string version)
     {
         int affectedRows = await _context
-            .Packages.Where(p =>
-                p.Id == packageId && p.NormalizedName == packageNormalizedName && p.Version == version
-            )
+            .Packages.Where(p => p.Id == packageId && p.Version == version)
             .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadCount, x => x.DownloadCount + 1))
             .ConfigureAwait(false);
 
