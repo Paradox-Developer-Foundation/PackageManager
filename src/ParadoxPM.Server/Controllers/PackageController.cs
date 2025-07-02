@@ -166,6 +166,7 @@ public sealed class PackagesController : ControllerBase
                 Integrity = packageInfo.Integrity,
                 Tarball = $"{id.Value}-{packageInfo.NormalizedName}-{packageInfo.Version}.7z",
                 UploadTime = DateTime.UtcNow,
+                DownloadCount = 0,
                 Dependencies = dependencyList
                     .Select(d => new Dependency
                     {

@@ -27,6 +27,9 @@ public sealed class PackageVersion
     public required DateTime UploadTime { get; set; }
 
     [Required]
+    public required int DownloadCount { get; set; }
+
+    [Required]
     [ForeignKey("Package")]
     public int PackageId { get; set; }
 
