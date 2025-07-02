@@ -33,22 +33,6 @@ public interface IPackageRepository
     /// <param name="package">包</param>
     /// <exception cref="ArgumentNullException">当参数为空时抛出</exception>
     Task AddPackageAsync(Package package);
-    //
-    // /// <summary>
-    // /// 更新包
-    // /// </summary>
-    // /// <param name="updatePackage">包</param>
-    // /// <exception cref="ArgumentNullException">当参数为空时抛出</exception>
-    // /// <exception cref="KeyNotFoundException">未找到符合要求的包时抛出</exception>
-    // Task UpdatePackageAsync(Package updatePackage);
-    //
-    // /// <summary>
-    // /// 删除包
-    // /// </summary>
-    // /// <param name="packageId">包的序号</param>
-    // /// <param name="packageNormalizedName">包的规范化名称</param>
-    // /// <exception cref="KeyNotFoundException">未找到符合要求的包时抛出</exception>
-    // Task DeletePackageAsync(int packageId, string packageNormalizedName);
-    //
+// Removed commented-out method signatures to keep the interface clean and focused.
     Task<int?> GetNextIdAsync();
 }
