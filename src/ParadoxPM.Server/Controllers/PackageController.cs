@@ -182,7 +182,7 @@ public sealed class PackagesController : ControllerBase
                 NormalizedName = packageInfo.NormalizedName,
                 Description = packageInfo.Description,
                 Arch = packageInfo.Arch,
-                IsActive = false,
+                IsActive = true,
                 Author = packageInfo.Author,
                 License = packageInfo.License,
                 Repository = packageInfo.Repository,
