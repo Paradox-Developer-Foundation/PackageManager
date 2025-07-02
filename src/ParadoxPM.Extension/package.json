@@ -25,7 +25,26 @@
         "command": "ParadoxPM-Server.helloWorld",
         "title": "Hello World"
       }
-    ]
+    ],
+    "viewsContainers": {
+      "panel": [
+        {
+          "id": "packages-manager",
+          "title": "Packages Manager",
+          "icon": "$(search-editor-label-icon)"
+        }
+      ]
+    },
+    "views": {
+      "packages-manager": [
+        {
+          "id": "packages-manager",
+          "name": "Packages Manager",
+          "icon": "$(package)",
+          "type": "webview"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "pnpm run build",

@@ -1,13 +1,14 @@
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
+import { PackagesManagerViewProvider } from "./packagesManagerViewProvider.js";
 
 export function activate(context: vscode.ExtensionContext) {
-	console.log('Congratulations, your extension "ParadoxPM-Server" is now active!');
+  console.log('Congratulations, your extension "ParadoxPM-Server" is now active!');
 
-	const disposable = vscode.commands.registerCommand('ParadoxPM-Server.helloWorld', () => {
-		vscode.window.showInformationMessage('Hello World from ParadoxPM.Server!');
-	});
+  const provider = new PackagesManagerViewProvider(context);
 
-	context.subscriptions.push(disposable);
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider(PackagesManagerViewProvider.viewType, provider)
+  );
 }
 
 export function deactivate() {}
