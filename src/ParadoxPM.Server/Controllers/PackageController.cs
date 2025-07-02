@@ -74,22 +74,22 @@ public sealed class PackagesController : ControllerBase
     }
 
     // GET: api/packages/{packageId}
-    [HttpGet("{id:int}")]
-    public async Task<ActionResult<ApiResponse<Package>>> GetPackage(int id)
+    [HttpGet("{packageId:int}")]
+    public async Task<ActionResult<ApiResponse<Package>>> GetPackage(int packageId)
     {
         try
         {
-            var package = await _packageRepository.GetPackageAsync(id);
+            var package = await _packageRepository.GetPackageAsync(packageId);
             return Ok(new ApiResponse<Package>(StatusCodes.Status200OK, "请求成功", package));
         }
         catch (KeyNotFoundException ex)
         {
-            _logger.LogWarning(ex, "未找到包, Id: {PackageId}", id);
+            _logger.ZLogWarning(ex, $"未找到包, Id: {packageId}");
             return NotFound(new ApiResponse<object?>(StatusCodes.Status404NotFound, ex.Message, null));
         }
         catch (DbUpdateException ex)
         {
-            _logger.LogError(ex, "获取包时发生数据库错误, Id: {PackageId}", id);
+            _logger.ZLogWarning(ex, $"包文件未找到, Id: {packageId}");
             return StatusCode(
                 StatusCodes.Status500InternalServerError,
                 new ApiResponse<object?>(
