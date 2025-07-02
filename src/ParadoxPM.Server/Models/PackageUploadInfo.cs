@@ -4,20 +4,6 @@ using System.Text.RegularExpressions;
 
 namespace ParadoxPM.Server.Models;
 
-public sealed class UploadDependency
-{
-    [Required]
-    public required int Id { get; set; }
-
-    [Required]
-    [StringLength(100)]
-    public required string NormalizedName { get; set; }
-
-    [Required]
-    [StringLength(20)]
-    public required string MinVersion { get; set; }
-}
-
 public sealed partial class PackageUploadInfo
 {
     [Required]
@@ -40,7 +26,7 @@ public sealed partial class PackageUploadInfo
     public required string Version { get; set; }
 
     [Required]
-    public List<UploadDependency> Dependencies { get; set; } = [];
+    public List<PackageUploadDependencyInfo> Dependencies { get; set; } = [];
 
     [Required]
     [StringLength(100)]

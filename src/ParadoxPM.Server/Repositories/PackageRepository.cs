@@ -38,7 +38,7 @@ public sealed class PackageRepository : IPackageRepository
         return package;
     }
 
-    public async Task<bool> IsValidDependenciesAsync(IEnumerable<UploadDependency> dependencies)
+    public async Task<bool> IsValidDependenciesAsync(IEnumerable<PackageUploadDependencyInfo> dependencies)
     {
         foreach (var dependency in dependencies)
         {

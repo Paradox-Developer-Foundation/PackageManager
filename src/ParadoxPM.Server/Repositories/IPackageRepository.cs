@@ -25,7 +25,7 @@ public interface IPackageRepository
     /// </summary>
     /// <param name="dependencies">依赖项</param>
     /// <returns>如果任意一个依赖项无效, 返回<c>false</c>, 否则返回<c>true</c></returns>
-    Task<bool> IsValidDependenciesAsync(IEnumerable<UploadDependency> dependencies);
+    Task<bool> IsValidDependenciesAsync(IEnumerable<PackageUploadDependencyInfo> dependencies);
 
     /// <summary>
     /// 添加新的包
