@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using ParadoxPM.Server.Models;
 using ParadoxPM.Server.Repositories;
 using ParadoxPM.Server.ViewModels;
-using ZLogger;
 
 namespace ParadoxPM.Server.Controllers;
 
@@ -15,6 +14,13 @@ public sealed class PackagesController : ControllerBase
     private readonly IPackageRepository _packageRepository;
     private readonly IFileRepository _fileRepository;
     private readonly ILogger<PackagesController> _logger;
+
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        AllowTrailingCommas = true,
+        ReadCommentHandling = JsonCommentHandling.Skip,
+    };
 
     public PackagesController(
         IPackageRepository packageRepository,
@@ -74,22 +80,22 @@ public sealed class PackagesController : ControllerBase
     }
 
     // GET: api/packages/{packageId}
-    [HttpGet("{packageId:int}")]
-    public async Task<ActionResult<ApiResponse<Package>>> GetPackage(int packageId)
+    [HttpGet("{id:int}")]
+    public async Task<ActionResult<ApiResponse<Package>>> GetPackage(int id)
     {
         try
         {
-            var package = await _packageRepository.GetPackageAsync(packageId);
+            var package = await _packageRepository.GetPackageAsync(id);
             return Ok(new ApiResponse<Package>(StatusCodes.Status200OK, "请求成功", package));
         }
         catch (KeyNotFoundException ex)
         {
-            _logger.ZLogWarning(ex, $"未找到包, Id: {packageId}");
+            _logger.LogWarning(ex, "未找到包, Id: {PackageId}", id);
             return NotFound(new ApiResponse<object?>(StatusCodes.Status404NotFound, ex.Message, null));
         }
         catch (DbUpdateException ex)
         {
-            _logger.ZLogWarning(ex, $"包文件未找到, Id: {packageId}");
+            _logger.LogError(ex, "获取包时发生数据库错误, Id: {PackageId}", id);
             return StatusCode(
                 StatusCodes.Status500InternalServerError,
                 new ApiResponse<object?>(
@@ -110,14 +116,10 @@ public sealed class PackagesController : ControllerBase
     {
         try
         {
-            var options = new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true,
-                AllowTrailingCommas = true,
-                ReadCommentHandling = JsonCommentHandling.Skip,
-            };
-
-            var packageInfo = JsonSerializer.Deserialize<PackageUploadInfo>(model.PackageInfoJson, options)!;
+            var packageInfo = JsonSerializer.Deserialize<PackageUploadInfo>(
+                model.PackageInfoJson,
+                JsonOptions
+            )!;
 
             if (!packageInfo.IsValid(out var errorMessages))
             {
