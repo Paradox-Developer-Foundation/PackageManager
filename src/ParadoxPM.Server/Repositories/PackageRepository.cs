@@ -65,7 +65,6 @@ public sealed class PackageRepository : IPackageRepository
         await _context.SaveChangesAsync();
     }
 
-// Removed commented-out legacy code for UpdatePackageAsync and DeletePackageAsync methods.
     public async Task<int?> GetNextIdAsync()
     {
         int[] array = await _context

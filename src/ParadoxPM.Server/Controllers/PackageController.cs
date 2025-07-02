@@ -221,36 +221,4 @@ public sealed class PackagesController : ControllerBase
             return BadRequest("内部错误");
         }
     }
-
-    // Get: api/packages/files
-    // [HttpGet("files")]
-    // public async Task<ActionResult<IEnumerable<string>>> GetPackage(
-    //     [FromQuery] int packageId,
-    //     [FromQuery] string version
-    // )
-    // {
-    //     try
-    //     {
-    //         var package = await _packageRepository.GetPackageAsync(packageId, version);
-    //         string filePath = package.FilePath;
-    //         var fileStream = await _fileRepository.GetFileAsync(filePath);
-    //         await _packageRepository.AddPackageDownloadCountAsync(packageId, version);
-    //         return File(fileStream, "application/zip", Path.GetFileName(filePath));
-    //     }
-    //     catch (DbUpdateException ex)
-    //     {
-    //         _logger.ZLogWarning(ex, $"获取包文件时发生错误, Id: {packageId}, Version: {version}");
-    //         return StatusCode(StatusCodes.Status500InternalServerError, $"数据库错误: {ex.Message}");
-    //     }
-    //     catch (KeyNotFoundException ex)
-    //     {
-    //         _logger.ZLogWarning(ex, $"未找到包, Id: {packageId}, Version: {version}");
-    //         return NotFound(ex.Message);
-    //     }
-    //     catch (FileNotFoundException ex)
-    //     {
-    //         _logger.ZLogWarning(ex, $"包文件未找到, Id: {packageId}, Version: {version}");
-    //         return StatusCode(StatusCodes.Status500InternalServerError, "文件存储错误: 文件未找到");
-    //     }
-    // }
 }
