@@ -33,6 +33,5 @@ public interface IPackageRepository
     /// <param name="package">包</param>
     /// <exception cref="ArgumentNullException">当参数为空时抛出</exception>
     Task AddPackageAsync(Package package);
-// Removed commented-out method signatures to keep the interface clean and focused.
     Task<int?> GetNextIdAsync();
 }

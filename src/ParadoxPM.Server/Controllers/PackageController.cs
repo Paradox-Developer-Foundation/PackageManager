@@ -219,11 +219,13 @@ public sealed class PackagesController : ControllerBase
         }
         catch (JsonException ex)
         {
-            return BadRequest(new ApiResponse<string>(
-                StatusCodes.Status400BadRequest,
-                $"Invalid JSON format: {ex.Message}",
-                null
-            ));
+            return BadRequest(
+                new ApiResponse<object?>(
+                    StatusCodes.Status400BadRequest,
+                    $"Invalid JSON format: {ex.Message}",
+                    null
+                )
+            );
         }
         catch (Exception ex)
         {
