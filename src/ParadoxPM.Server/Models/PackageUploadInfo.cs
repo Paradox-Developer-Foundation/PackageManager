@@ -1,18 +1,23 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 
-namespace ParadoxPM.Server.ViewModels;
+namespace ParadoxPM.Server.Models;
 
-public sealed partial class FileUploadViewModel
+public sealed class UploadDependency
 {
     [Required]
-    public required IFormFile File { get; set; }
+    public required int Id { get; set; }
 
     [Required]
-    public required string PackageInfoJson { get; set; }
+    [StringLength(100)]
+    public required string NormalizedName { get; set; }
+
+    [Required]
+    [StringLength(20)]
+    public required string MinVersion { get; set; }
 }
 
-public sealed partial class PackageInfo
+public sealed partial class PackageUploadInfo
 {
     [Required]
     [StringLength(100)]
@@ -60,7 +65,7 @@ public sealed partial class PackageInfo
 
     [GeneratedRegex(@"^[\P{C}\s]*$")]
     private static partial Regex ValidNameRegex();
-    
+
     [GeneratedRegex(@"^[a-z0-9]+$")]
     private static partial Regex ValidNormalizedNameRegex();
 
@@ -104,18 +109,4 @@ public sealed partial class PackageInfo
         errorMessages = errorList;
         return errorList.Count == 0;
     }
-}
-
-public sealed class UploadDependency
-{
-    [Required]
-    public required int DependencyId { get; set; }
-
-    [Required]
-    [StringLength(100)]
-    public required string NormalizedName { get; set; }
-
-    [Required]
-    [StringLength(20)]
-    public required string MinVersion { get; set; }
 }

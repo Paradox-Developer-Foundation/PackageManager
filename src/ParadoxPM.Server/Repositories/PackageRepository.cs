@@ -47,7 +47,7 @@ public sealed class PackageRepository : IPackageRepository
                     .Packages.AsNoTracking()
                     .Select(p => new { p.Id, p.NormalizedName })
                     .AnyAsync(x =>
-                        x.Id == dependency.DependencyId && x.NormalizedName == dependency.NormalizedName
+                        x.Id == dependency.Id && x.NormalizedName == dependency.NormalizedName
                     )
             )
             {

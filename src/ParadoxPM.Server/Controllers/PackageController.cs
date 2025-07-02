@@ -104,7 +104,9 @@ public sealed class PackagesController : ControllerBase
     // POST: api/packages/upload
     [HttpPost("upload")]
     [Consumes("multipart/form-data")]
-    public async Task<ActionResult<ApiResponse<Package>>> UploadPackage([FromForm] FileUploadViewModel model)
+    public async Task<ActionResult<ApiResponse<Package>>> UploadPackage(
+        [FromForm] PackageUploadViewModel model
+    )
     {
         try
         {
@@ -115,7 +117,7 @@ public sealed class PackagesController : ControllerBase
                 ReadCommentHandling = JsonCommentHandling.Skip,
             };
 
-            var packageInfo = JsonSerializer.Deserialize<PackageInfo>(model.PackageInfoJson, options)!;
+            var packageInfo = JsonSerializer.Deserialize<PackageUploadInfo>(model.PackageInfoJson, options)!;
 
             if (!packageInfo.IsValid(out var errorMessages))
             {
@@ -167,7 +169,7 @@ public sealed class PackagesController : ControllerBase
                 Dependencies = dependencyList
                     .Select(d => new Dependency
                     {
-                        DependencyId = d.DependencyId,
+                        DependencyId = d.Id,
                         NormalizedName = d.NormalizedName,
                         MinVersion = d.MinVersion,
                     })
