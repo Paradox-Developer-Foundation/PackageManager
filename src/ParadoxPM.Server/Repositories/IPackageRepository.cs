@@ -1,4 +1,5 @@
 using ParadoxPM.Server.Models;
+using ParadoxPM.Server.ViewModels;
 
 namespace ParadoxPM.Server.Repositories;
 
@@ -15,26 +16,16 @@ public interface IPackageRepository
     /// 获取指定的包
     /// </summary>
     /// <param name="packageId">包的序号</param>
-    /// <param name="version">包的版本号</param>
-    /// <param name="isActiveOnly">是否只获取启用的包</param>
     /// <exception cref="KeyNotFoundException">未找到符合要求的包时抛出</exception>
     /// <returns>包</returns>
-    Task<Package> GetPackageAsync(int packageId, string version, bool isActiveOnly = true);
+    Task<Package> GetPackageAsync(int packageId);
 
     /// <summary>
     /// 检查所有依赖项是否有效
     /// </summary>
     /// <param name="dependencies">依赖项</param>
     /// <returns>如果任意一个依赖项无效, 返回<c>false</c>, 否则返回<c>true</c></returns>
-    Task<bool> IsValidDependenciesAsync(IEnumerable<string> dependencies);
-
-    /// <summary>
-    /// 增加包的下载计数
-    /// </summary>
-    /// <param name="packageId">包的序号</param>
-    /// <param name="version"></param>
-    /// <exception cref="KeyNotFoundException">未找到符合要求的包时抛出</exception>
-    Task AddPackageDownloadCountAsync(int packageId, string version);
+    Task<bool> IsValidDependenciesAsync(IEnumerable<PackageUploadDependencyInfo> dependencies);
 
     /// <summary>
     /// 添加新的包
@@ -42,22 +33,5 @@ public interface IPackageRepository
     /// <param name="package">包</param>
     /// <exception cref="ArgumentNullException">当参数为空时抛出</exception>
     Task AddPackageAsync(Package package);
-
-    /// <summary>
-    /// 更新包
-    /// </summary>
-    /// <param name="updatePackage">包</param>
-    /// <exception cref="ArgumentNullException">当参数为空时抛出</exception>
-    /// <exception cref="KeyNotFoundException">未找到符合要求的包时抛出</exception>
-    Task UpdatePackageAsync(Package updatePackage);
-
-    /// <summary>
-    /// 删除包
-    /// </summary>
-    /// <param name="packageId">包的序号</param>
-    /// <param name="packageNormalizedName">包的规范化名称</param>
-    /// <exception cref="KeyNotFoundException">未找到符合要求的包时抛出</exception>
-    Task DeletePackageAsync(int packageId, string packageNormalizedName);
-
     Task<int?> GetNextIdAsync();
 }
