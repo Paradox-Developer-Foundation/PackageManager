@@ -1,14 +1,15 @@
 using Microsoft.EntityFrameworkCore;
 using ParadoxPM.Server.Models;
 using ParadoxPM.Server.ViewModels;
+using AppContext = ParadoxPM.Server.Models.AppContext;
 
 namespace ParadoxPM.Server.Repositories;
 
 public sealed class PackageRepository : IPackageRepository
 {
-    private readonly PackageContext _context;
+    private readonly AppContext _context;
 
-    public PackageRepository(PackageContext context)
+    public PackageRepository(AppContext context)
     {
         _context = context;
     }
@@ -46,9 +47,7 @@ public sealed class PackageRepository : IPackageRepository
                 !await _context
                     .Packages.AsNoTracking()
                     .Select(p => new { p.Id, p.NormalizedName })
-                    .AnyAsync(x =>
-                        x.Id == dependency.Id && x.NormalizedName == dependency.NormalizedName
-                    )
+                    .AnyAsync(x => x.Id == dependency.Id && x.NormalizedName == dependency.NormalizedName)
             )
             {
                 return false;
@@ -62,6 +61,19 @@ public sealed class PackageRepository : IPackageRepository
     {
         ArgumentNullException.ThrowIfNull(package);
         _context.Packages.Add(package);
+
+        // 更新包的最后修改时间
+        var updateTime = await _context.UpdateTimes.AsNoTracking().FirstOrDefaultAsync(u => u.Id == 1);
+        if (updateTime == null)
+        {
+            updateTime = new UpdateTime { Id = 1, PackageLastModified = DateTime.UtcNow };
+            _context.UpdateTimes.Add(updateTime);
+        }
+        else
+        {
+            updateTime.PackageLastModified = DateTime.UtcNow;
+            _context.UpdateTimes.Update(updateTime);
+        }
         await _context.SaveChangesAsync();
     }
 
@@ -72,5 +84,16 @@ public sealed class PackageRepository : IPackageRepository
             .ToArrayAsync();
 
         return array.Length == 0 ? null : array[0];
+    }
+
+    public async Task<DateTime> GetPackageLastModifiedAsync()
+    {
+        var updateTime = await _context.UpdateTimes.AsNoTracking().FirstOrDefaultAsync(u => u.Id == 1);
+        var lastModified = DateTime.UtcNow;
+        if (updateTime != null)
+        {
+            lastModified = updateTime.PackageLastModified;
+        }
+        return lastModified;
     }
 }

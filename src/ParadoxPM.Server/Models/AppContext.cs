@@ -2,14 +2,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ParadoxPM.Server.Models;
 
-public sealed class PackageContext : DbContext
+public sealed class AppContext : DbContext
 {
-    public PackageContext(DbContextOptions<PackageContext> options)
+    public AppContext(DbContextOptions<AppContext> options)
         : base(options) { }
 
     public DbSet<Package> Packages { get; set; }
     public DbSet<PackageVersion> PackageVersions { get; set; }
     public DbSet<Dependency> Dependencies { get; set; }
+    public DbSet<UpdateTime> UpdateTimes { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

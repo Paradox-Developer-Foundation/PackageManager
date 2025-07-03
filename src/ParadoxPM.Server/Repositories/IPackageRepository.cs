@@ -34,4 +34,6 @@ public interface IPackageRepository
     /// <exception cref="ArgumentNullException">当参数为空时抛出</exception>
     Task AddPackageAsync(Package package);
     Task<int?> GetNextIdAsync();
+
+    Task<DateTime> GetPackageLastModifiedAsync();
 }

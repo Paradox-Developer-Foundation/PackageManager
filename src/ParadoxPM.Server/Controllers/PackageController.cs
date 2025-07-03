@@ -40,6 +40,18 @@ public sealed class PackagesController : ControllerBase
     {
         try
         {
+            var lastModified = await _packageRepository.GetPackageLastModifiedAsync();
+            Response.Headers.Append("Last-Modified", lastModified.ToString("R"));
+            if (Request.Headers.TryGetValue("If-Modified-Since", out var ifModifiedSince))
+            {
+                if (
+                    DateTime.TryParse(ifModifiedSince, out var parsedIfModifiedSince)
+                    && lastModified <= parsedIfModifiedSince
+                )
+                {
+                    return StatusCode(StatusCodes.Status304NotModified);
+                }
+            }
             var packages = await _packageRepository.GetPackagesAsync(isActiveOnly: false);
             return Ok(new ApiResponse<IEnumerable<Package>>(StatusCodes.Status200OK, "请求成功", packages));
         }
@@ -63,7 +75,20 @@ public sealed class PackagesController : ControllerBase
     {
         try
         {
+            var lastModified = await _packageRepository.GetPackageLastModifiedAsync();
+            Response.Headers.Append("Last-Modified", lastModified.ToString("R"));
+            if (Request.Headers.TryGetValue("If-Modified-Since", out var ifModifiedSince))
+            {
+                if (
+                    DateTime.TryParse(ifModifiedSince, out var parsedIfModifiedSince)
+                    && lastModified <= parsedIfModifiedSince
+                )
+                {
+                    return StatusCode(StatusCodes.Status304NotModified);
+                }
+            }
             var packages = await _packageRepository.GetPackagesAsync(isActiveOnly: true);
+
             return Ok(new ApiResponse<IEnumerable<Package>>(StatusCodes.Status200OK, "请求成功", packages));
         }
         catch (DbUpdateException ex)
