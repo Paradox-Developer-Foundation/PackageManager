@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using ParadoxPM.Server.Models;
-using ParadoxPM.Server.ViewModels;
 
 namespace ParadoxPM.Server.Repositories;
 
@@ -13,23 +12,23 @@ public sealed class PackageRepository : IPackageRepository
         _context = context;
     }
 
-    public async Task<IEnumerable<Package>> GetPackagesAsync(bool isActiveOnly = true)
+    public async Task<IEnumerable<Package>> GetPackagesAsync(bool isActiveOnly, CancellationToken token)
     {
         return await _context
             .Packages.AsNoTracking()
             .Include(p => p.Versions)
             .ThenInclude(v => v.Dependencies)
             .Where(p => !isActiveOnly || p.IsActive)
-            .ToListAsync();
+            .ToListAsync(token);
     }
 
-    public async Task<Package> GetPackageAsync(int packageId)
+    public async Task<Package> GetPackageAsync(int packageId, CancellationToken token)
     {
         var package = await _context
             .Packages.AsNoTracking()
             .Include(p => p.Versions)
             .ThenInclude(v => v.Dependencies)
-            .FirstOrDefaultAsync(p => p.Id == packageId);
+            .FirstOrDefaultAsync(p => p.Id == packageId, token);
 
         if (package is null)
         {
@@ -46,9 +45,7 @@ public sealed class PackageRepository : IPackageRepository
                 !await _context
                     .Packages.AsNoTracking()
                     .Select(p => new { p.Id, p.NormalizedName })
-                    .AnyAsync(x =>
-                        x.Id == dependency.Id && x.NormalizedName == dependency.NormalizedName
-                    )
+                    .AnyAsync(x => x.Id == dependency.Id && x.NormalizedName == dependency.NormalizedName)
             )
             {
                 return false;
