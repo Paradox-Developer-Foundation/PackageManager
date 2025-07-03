@@ -1,5 +1,4 @@
 using ParadoxPM.Server.Models;
-using ParadoxPM.Server.ViewModels;
 
 namespace ParadoxPM.Server.Repositories;
 
@@ -9,16 +8,18 @@ public interface IPackageRepository
     /// 获取所有的包
     /// </summary>
     /// <param name="isActiveOnly">是否只获取启用的包</param>
+    /// <param name="token">取消令牌</param>
     /// <returns>包的枚举器</returns>
-    Task<IEnumerable<Package>> GetPackagesAsync(bool isActiveOnly = true);
+    Task<IEnumerable<Package>> GetPackagesAsync(bool isActiveOnly, CancellationToken token);
 
     /// <summary>
     /// 获取指定的包
     /// </summary>
     /// <param name="packageId">包的序号</param>
+    /// <param name="token">取消令牌</param>
     /// <exception cref="KeyNotFoundException">未找到符合要求的包时抛出</exception>
     /// <returns>包</returns>
-    Task<Package> GetPackageAsync(int packageId);
+    Task<Package> GetPackageAsync(int packageId, CancellationToken token);
 
     /// <summary>
     /// 检查所有依赖项是否有效
