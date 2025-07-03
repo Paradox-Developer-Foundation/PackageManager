@@ -2,7 +2,7 @@
     <div class="package-details">
         <div class="package-details-header">
             <p>版本</p>
-            <vscode-single-select>
+            <vscode-single-select :selectedIndex="selectedIndex">
                 <vscode-option v-for="version in package?.versions">{{ version.version }}</vscode-option>
             </vscode-single-select>
         </div>
@@ -16,6 +16,15 @@
                 <a class="link" :href="package.repository" v-if="package.repository">仓库地址</a>
                 <a class="link" :href="package.homepage" v-if="package.homepage">项目主页</a>
             </div>
+            <div v-if="package.versions[selectedIndex]?.dependencies && package.versions[selectedIndex].dependencies.length > 0">
+                <h2>依赖</h2>
+                <p v-for="(dependency, index) in package.versions[selectedIndex].dependencies" :key="index">
+                    {{ dependency.normalizedName }} >= {{ dependency.minVersion }}
+                </p>
+            </div>
+            <h2 v-else>
+                无依赖
+            </h2>
         </div>
         <div v-else>
             <p>请选择一个包以查看详情。</p>
@@ -24,10 +33,12 @@
 </template>
 
 <script lang="ts" setup>
+import { ref } from 'vue';
 import type { PackageInfo } from '../types/packageInfo';
 
+const selectedIndex = ref(0);
 
-const props = defineProps<{
+defineProps<{
     package: PackageInfo | null
 }>()
 
@@ -38,7 +49,7 @@ const props = defineProps<{
     display: flex;
     align-items: center;
     justify-content: left;
-    margin-bottom: 16px;
+    gap: 4px;
 }
 
 .links-container {
