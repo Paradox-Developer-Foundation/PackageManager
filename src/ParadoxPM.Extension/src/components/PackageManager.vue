@@ -1,17 +1,22 @@
 <template>
     <div class="container">
         <div class="left-panel">
-            <vscode-textfield class="search-box" placeholder="搜索包..." style="width: 100%; box-sizing: border-box;">
-                <vscode-icon slot="content-before" name="search" title="search"></vscode-icon>
-            </vscode-textfield>
+            <div class="search-header">
+                <vscode-textfield class="search-box" placeholder="搜索包...">
+                    <vscode-icon slot="content-before" name="search" title="search"></vscode-icon>
+                </vscode-textfield>
+            </div>
             <ListBox :items="packages" :show-tooltip="false" @selection-changed="selectedPackage = $event">
                 <template #item="{ item }">
                     <div class="package-item">
-                        <p>{{ item.name }} {{ item.versions.length > 0 ? item.versions[0].version || "" : "" }}</p>
+                        <!-- TODO: 显示最新版本 -->
+                        <p style="margin-left: 4px;">{{ item.name }} {{ item.versions.length > 0 ?
+                            item.versions[0].version || "" : "" }}</p>
                     </div>
                 </template>
             </ListBox>
         </div>
+
         <div class="right-panel">
             <PackageDetails :package="selectedPackage" />
         </div>
@@ -56,24 +61,43 @@ const fetchPackages = async (): Promise<void> => {
 .container {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    /* 两个相同大小的列 */
     height: 100vh;
-    /* 全屏高度 */
     gap: 16px;
-    /* 间距 */
 }
 
-.left-panel,
+.search-header {
+    flex-shrink: 0;
+    /* 防止搜索框收缩 */
+    padding: 2px;
+    background-color: var(--vscode-editor-background);
+}
+
+.search-box {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.left-panel {
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--vscode-panel-border);
+    /* 防止整个面板滚动 */
+    overflow: hidden;
+}
+
 .right-panel {
-    border: 1px solid #ccc;
     padding: 4px;
     overflow-y: auto;
-    /* 内容溢出时滚动 */
 }
 
 .package-item {
-    padding: 1px;
-    border-bottom: 1px;
+    padding: 0.5px;
+    border-bottom: 1px solid var(--vscode-panel-border);
     cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.package-item:hover {
+    background-color: var(--vscode-list-hoverBackground);
 }
 </style>
