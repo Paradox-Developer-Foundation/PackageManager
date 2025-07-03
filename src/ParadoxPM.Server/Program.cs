@@ -18,6 +18,21 @@ builder.Services.AddScoped<IFileRepository>(_ => new FileRepository(AppConfigura
 
 builder.Services.AddControllers();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(
+        "AllowVueApp",
+        policy =>
+        {
+            policy
+                .WithOrigins("http://localhost:5173") // Vue 开发服务器地址
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+        }
+    );
+});
+
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 // builder.Services.AddOpenApi();
 
@@ -35,6 +50,8 @@ if (app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
+
+app.UseCors("AllowVueApp");
 
 app.UseHttpsRedirection();
 

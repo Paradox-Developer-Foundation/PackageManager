@@ -20,7 +20,8 @@ public sealed class PackageRepository : IPackageRepository
             .Include(p => p.Versions)
             .ThenInclude(v => v.Dependencies)
             .Where(p => !isActiveOnly || p.IsActive)
-            .ToListAsync();
+            .ToListAsync()
+            .ConfigureAwait(false);
     }
 
     public async Task<Package> GetPackageAsync(int packageId)
@@ -46,9 +47,7 @@ public sealed class PackageRepository : IPackageRepository
                 !await _context
                     .Packages.AsNoTracking()
                     .Select(p => new { p.Id, p.NormalizedName })
-                    .AnyAsync(x =>
-                        x.Id == dependency.Id && x.NormalizedName == dependency.NormalizedName
-                    )
+                    .AnyAsync(x => x.Id == dependency.Id && x.NormalizedName == dependency.NormalizedName)
             )
             {
                 return false;
