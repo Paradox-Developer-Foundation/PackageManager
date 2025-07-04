@@ -16,12 +16,13 @@ public sealed class PackagesController : ControllerBase
     private readonly IFileRepository _fileRepository;
     private readonly ILogger<PackagesController> _logger;
 
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        PropertyNameCaseInsensitive = true,
-        AllowTrailingCommas = true,
-        ReadCommentHandling = JsonCommentHandling.Skip,
-    };
+    private static readonly JsonSerializerOptions JsonOptions =
+        new()
+        {
+            PropertyNameCaseInsensitive = true,
+            AllowTrailingCommas = true,
+            ReadCommentHandling = JsonCommentHandling.Skip,
+        };
 
     public PackagesController(
         IPackageRepository packageRepository,
@@ -42,7 +43,7 @@ public sealed class PackagesController : ControllerBase
 
         try
         {
-            var packages = await _packageRepository.GetPackagesAsync(isActiveOnly: false);
+            var packages = await _packageRepository.GetPackagesAsync(false, HttpContext.RequestAborted);
             return Ok(new ApiResponse<IEnumerable<Package>>(StatusCodes.Status200OK, "请求成功", packages));
         }
         catch (DbUpdateException ex)
@@ -65,7 +66,7 @@ public sealed class PackagesController : ControllerBase
     {
         try
         {
-            var packages = await _packageRepository.GetPackagesAsync(isActiveOnly: true);
+            var packages = await _packageRepository.GetPackagesAsync(true, HttpContext.RequestAborted);
             return Ok(new ApiResponse<IEnumerable<Package>>(StatusCodes.Status200OK, "请求成功", packages));
         }
         catch (DbUpdateException ex)
@@ -88,7 +89,7 @@ public sealed class PackagesController : ControllerBase
     {
         try
         {
-            var package = await _packageRepository.GetPackageAsync(packageId);
+            var package = await _packageRepository.GetPackageAsync(packageId, HttpContext.RequestAborted);
             return Ok(new ApiResponse<Package>(StatusCodes.Status200OK, "请求成功", package));
         }
         catch (KeyNotFoundException ex)
@@ -122,7 +123,14 @@ public sealed class PackagesController : ControllerBase
             var packageInfo = JsonSerializer.Deserialize<PackageUploadInfo>(
                 model.PackageInfoJson,
                 JsonOptions
-            )!;
+            );
+
+            if (packageInfo is null)
+            {
+                return BadRequest(
+                    new ApiResponse<object?>(StatusCodes.Status400BadRequest, "无效的包 JSON 信息", null)
+                );
+            }
 
             if (!packageInfo.IsValid(out var errorMessages))
             {
