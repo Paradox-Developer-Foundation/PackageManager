@@ -19,7 +19,8 @@ public sealed class PackageRepository : IPackageRepository
             .Include(p => p.Versions)
             .ThenInclude(v => v.Dependencies)
             .Where(p => !isActiveOnly || p.IsActive)
-            .ToListAsync(token);
+            .ToListAsync(token)
+            .ConfigureAwait(false);
     }
 
     public async Task<Package> GetPackageAsync(int packageId, CancellationToken token)

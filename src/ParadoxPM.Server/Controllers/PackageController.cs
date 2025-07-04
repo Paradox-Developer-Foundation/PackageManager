@@ -39,6 +39,8 @@ public sealed class PackagesController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<ApiResponse<IEnumerable<Package>>>> GetAllPackages()
     {
+        _logger.ZLogDebug($"ip: {HttpContext.Connection.RemoteIpAddress} 请求获取所有包");
+
         try
         {
             var packages = await _packageRepository.GetPackagesAsync(false, HttpContext.RequestAborted);
