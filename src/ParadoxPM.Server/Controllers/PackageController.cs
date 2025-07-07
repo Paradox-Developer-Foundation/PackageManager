@@ -221,9 +221,10 @@ public sealed class PackagesController : ControllerBase
             }
 
             _logger.ZLogError(ex, $"创建包时发生数据库错误");
+            var entryDetails = ex.Entries != null ? JsonSerializer.Serialize(ex.Entries) : "无详细信息";
             return StatusCode(
                 StatusCodes.Status500InternalServerError,
-                $"数据库错误: {ex.Message}" + ex.Entries
+                $"数据库错误: {ex.Message}. 详细信息: {entryDetails}"
             );
         }
         catch (IOException ex)

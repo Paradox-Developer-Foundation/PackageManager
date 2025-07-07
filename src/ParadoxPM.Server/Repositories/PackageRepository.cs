@@ -38,9 +38,9 @@ public sealed class PackageRepository : IPackageRepository
             .Packages.AsNoTracking()
             .Where(p =>
                 (
-                    EF.Functions.Like(p.Name, pattern)
-                    || EF.Functions.Like(p.NormalizedName, pattern)
-                    || EF.Functions.Like(p.Description, pattern)
+                    EF.Functions.Like(p.Name.ToLower(), pattern)
+                    || EF.Functions.Like(p.NormalizedName.ToLower(), pattern)
+                    || EF.Functions.Like(p.Description.ToLower(), pattern)
                 ) && (arch == null || p.Arch == arch)
             )
             .ToListAsync(token);
