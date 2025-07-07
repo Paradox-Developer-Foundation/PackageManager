@@ -167,7 +167,7 @@ public sealed class PackagesController : ControllerBase
             {
                 Version = packageInfo.Version,
                 Integrity = packageInfo.Integrity,
-                Tarball = $"{packageInfo.NormalizedName}-{packageInfo.Version}.7z",
+                Tarball = $"{id}-{packageInfo.Version}.7z",
                 UploadTime = DateTime.UtcNow,
                 DownloadCount = 0,
                 Dependencies = dependencyList
@@ -199,7 +199,7 @@ public sealed class PackagesController : ControllerBase
 
             await _packageRepository.AddPackageAsync(package);
             await _fileRepository.SaveFileAsync(
-                $"{package.NormalizedName}/{version.Version}/{version.Tarball}",
+                $"{package.Id}/{version.Version}/{version.Tarball}",
                 fileStream
             );
 
@@ -293,12 +293,12 @@ public sealed class PackagesController : ControllerBase
 
     // 下载指定的包
     // GET: api/packages/download/{normalizedName}/{version}
-    [HttpGet("download/{normalizedName}/{version}")]
-    public async Task<IActionResult> DownloadPackage(string normalizedName, string version)
+    [HttpGet("download/{id}/{version}")]
+    public async Task<IActionResult> DownloadPackage(string id, string version)
     {
         try
         {
-            string tarball = $"{normalizedName}/{version}/{normalizedName}-{version}.7z";
+            string tarball = $"{id}/{version}/{id}-{version}.7z";
             var fileStream = await _fileRepository.GetFileAsync(tarball);
             return File(fileStream, "application/x-7z-compressed", tarball);
         }
@@ -308,18 +308,12 @@ public sealed class PackagesController : ControllerBase
         }
         catch (IOException ex)
         {
-            _logger.ZLogError(
-                ex,
-                $"下载包时发生文件错误, normalizedName: {normalizedName}, version: {version}"
-            );
+            _logger.ZLogError(ex, $"下载包时发生文件错误, id: {id}, version: {version}");
             return StatusCode(StatusCodes.Status500InternalServerError, "文件读取错误");
         }
         catch (Exception ex)
         {
-            _logger.ZLogError(
-                ex,
-                $"下载包时发生未知错误, normalizedName: {normalizedName}, version: {version}"
-            );
+            _logger.ZLogError(ex, $"下载包时发生未知错误, id: {id}, version: {version}");
             return StatusCode(
                 StatusCodes.Status500InternalServerError,
                 new ApiResponse<object?>(StatusCodes.Status500InternalServerError, "内部错误", null)
