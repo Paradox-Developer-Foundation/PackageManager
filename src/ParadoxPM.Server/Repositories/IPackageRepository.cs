@@ -4,14 +4,6 @@ namespace ParadoxPM.Server.Repositories;
 
 public interface IPackageRepository
 {
-    // /// <summary>
-    // /// 获取所有的包
-    // /// </summary>
-    // /// <param name="isActiveOnly">是否只获取启用的包</param>
-    // /// <param name="token">取消令牌</param>
-    // /// <returns>包的枚举器</returns>
-    // Task<IEnumerable<Package>> GetPackagesAsync(bool isActiveOnly, CancellationToken token);
-
     /// <summary>
     /// 获取指定的包
     /// </summary>
@@ -43,5 +35,17 @@ public interface IPackageRepository
     /// <param name="package">包</param>
     /// <exception cref="ArgumentNullException">当参数为空时抛出</exception>
     Task AddPackageAsync(Package package);
+    
+    /// <summary>
+    /// 更新包
+    /// </summary>
+    /// <param name="package"></param>
+    /// <returns></returns>
+    Task UpdatePackageAsync(Package package);
+    
+    /// <summary>
+    /// 获取下一个可用的包 ID
+    /// </summary>
+    /// <returns>可用的 ID</returns>
     Task<int?> GetNextIdAsync();
 }

@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
@@ -107,6 +108,7 @@ public sealed class PackagesController : ControllerBase
         }
     }
 
+    // 创建并上传包
     // POST: api/packages/upload
     [HttpPost("upload")]
     [Consumes("multipart/form-data")]
@@ -240,7 +242,67 @@ public sealed class PackagesController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "上传文件时发生错误");
-            return BadRequest("内部错误");
+            return StatusCode(StatusCodes.Status500InternalServerError, "内部错误");
+        }
+    }
+
+    // 修改包的启用状态
+    // PATCH: api/packages/update/{packageId:int}/status
+    [HttpPatch("update/{packageId:int}/status")]
+    public async Task<ActionResult<ApiResponse<Package>>> UpdatePackageStatus(
+        int packageId,
+        [FromQuery] bool isActive
+    )
+    {
+        try
+        {
+            var package = await _packageRepository.GetPackageAsync(packageId, HttpContext.RequestAborted);
+            package.IsActive = isActive;
+            await _packageRepository.UpdatePackageAsync(package);
+            return Ok(new ApiResponse<Package>(StatusCodes.Status200OK, "状态更新成功", package));
+        }
+        catch (KeyNotFoundException ex)
+        {
+            _logger.ZLogWarning(ex, $"包不存在, Id: {packageId}");
+            return NotFound(new ApiResponse<object?>(StatusCodes.Status404NotFound, ex.Message, null));
+        }
+        catch (DbUpdateException ex)
+        {
+            _logger.ZLogError(ex, $"更新包状态时发生数据库错误, Id: {packageId}");
+            return StatusCode(
+                StatusCodes.Status500InternalServerError,
+                new ApiResponse<object?>(
+                    StatusCodes.Status500InternalServerError,
+                    $"数据库错误: {ex.Message}",
+                    null
+                )
+            );
+        }
+    }
+
+    // 下载指定的包
+    // GET: api/packages/download/{tarball}
+    [HttpGet("download/{tarball}")]
+    public async Task<IActionResult> DownloadPackage(string tarball)
+    {
+        try
+        {
+            var fileStream = await _fileRepository.GetFileAsync(tarball);
+            return File(fileStream, "application/x-7z-compressed", tarball);
+        }
+        catch (FileNotFoundException ex)
+        {
+            return NotFound(new ApiResponse<object?>(StatusCodes.Status404NotFound, ex.Message, null));
+        }
+        catch (IOException ex)
+        {
+            _logger.ZLogError(ex, $"下载包时发生文件错误, Tarball: {tarball}");
+            return StatusCode(StatusCodes.Status500InternalServerError, "文件读取错误");
+        }
+        catch (Exception ex)
+        {
+            _logger.ZLogError(ex, $"下载包时发生未知错误, Tarball: {tarball}");
+            return StatusCode(StatusCodes.Status500InternalServerError, "内部错误");
         }
     }
 }

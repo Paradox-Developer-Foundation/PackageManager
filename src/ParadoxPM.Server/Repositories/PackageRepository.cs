@@ -12,16 +12,6 @@ public sealed class PackageRepository : IPackageRepository
         _context = context;
     }
 
-    // public async Task<IEnumerable<Package>> GetPackagesAsync(bool isActiveOnly, CancellationToken token)
-    // {
-    //     return await _context
-    //         .Packages.AsNoTracking()
-    //         .Include(p => p.Versions)
-    //         .ThenInclude(v => v.Dependencies)
-    //         .Where(p => !isActiveOnly || p.IsActive)
-    //         .ToListAsync(token);
-    // }
-
     public async Task<Package> GetPackageAsync(int packageId, CancellationToken token)
     {
         var package = await _context
@@ -92,6 +82,13 @@ public sealed class PackageRepository : IPackageRepository
     {
         ArgumentNullException.ThrowIfNull(package);
         _context.Packages.Add(package);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task UpdatePackageAsync(Package package)
+    {
+        ArgumentNullException.ThrowIfNull(package);
+        _context.Packages.Update(package);
         await _context.SaveChangesAsync();
     }
 

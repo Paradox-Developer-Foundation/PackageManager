@@ -16,7 +16,7 @@ public sealed class FileRepository : IFileRepository
         string fullPath = Path.Combine(_basePath, path);
         if (!File.Exists(fullPath))
         {
-            throw new FileNotFoundException();
+            throw new FileNotFoundException("文件不存在");
         }
 
         return Task.FromResult<Stream>(new FileStream(fullPath, FileMode.Open, FileAccess.Read));
