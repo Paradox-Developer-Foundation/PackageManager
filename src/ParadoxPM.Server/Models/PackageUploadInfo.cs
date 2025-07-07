@@ -47,7 +47,7 @@ public sealed partial class PackageUploadInfo
     [StringLength(100)]
     public string? Homepage { get; set; }
 
-    [GeneratedRegex("^sha256-[a-fA-F0-9]{64}$")]
+    [GeneratedRegex("^(sha256)-[a-fA-F0-9]{64}$")]
     private static partial Regex Sha256Regex();
 
     [GeneratedRegex(@"^[\P{C}\s]*$")]
@@ -70,7 +70,7 @@ public sealed partial class PackageUploadInfo
         "csl2"
     );
 
-    public bool IsValid(out IEnumerable<string> errorMessages)
+    public void ValidCheck()
     {
         var errorList = new List<string>();
 
@@ -99,7 +99,27 @@ public sealed partial class PackageUploadInfo
             errorList.Add("游戏类型不正确");
         }
 
-        errorMessages = errorList;
-        return errorList.Count == 0;
+        List<string> dependencyErrors = [];
+        foreach (var dependency in Dependencies)
+        {
+            if (!dependency.IsValid(out var depErrors))
+            {
+                dependencyErrors.AddRange(depErrors);
+            }
+        }
+        string errorMessages = string.Empty;
+        if (errorList.Count > 0)
+        {
+            errorMessages = string.Join("; ", errorList);
+        }
+
+        if (dependencyErrors.Count > 0)
+        {
+            errorMessages += "依赖项错误: " + string.Join("; ", dependencyErrors);
+        }
+        if (errorMessages.Length > 0)
+        {
+            throw new ArgumentException("上传信息格式错误: " + errorMessages);
+        }
     }
 }

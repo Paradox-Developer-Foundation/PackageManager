@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using ParadoxPM.Server.Models;
 using ParadoxPM.Server.Repositories;
 using ParadoxPM.Server.ViewModels;
@@ -36,7 +37,7 @@ public sealed class PackagesController : ControllerBase
 
     // 查询指定的包
     // GET: api/packages/query/meta/{id}
-    [HttpGet("query/meta/{packageId:int}")]
+    [HttpGet("query/{packageId:int}/meta")]
     public async Task<ActionResult<ApiResponse<Package>>> GetPackage(int packageId)
     {
         try
@@ -115,6 +116,7 @@ public sealed class PackagesController : ControllerBase
     {
         try
         {
+            string? authToken = Request.Cookies["Token"];
             var packageInfo = JsonSerializer.Deserialize<PackageUploadInfo>(
                 model.PackageInfoJson,
                 JsonOptions
@@ -127,17 +129,7 @@ public sealed class PackagesController : ControllerBase
                 );
             }
 
-            if (!packageInfo.IsValid(out var errorMessages))
-            {
-                string combinedErrors = string.Join("; ", errorMessages);
-                return BadRequest(
-                    new ApiResponse<object?>(
-                        StatusCodes.Status400BadRequest,
-                        combinedErrors, // 使用合并后的错误字符串
-                        null
-                    )
-                );
-            }
+            packageInfo.ValidCheck();
 
             var dependencyList = packageInfo.Dependencies;
 
@@ -150,17 +142,14 @@ public sealed class PackagesController : ControllerBase
 
             // 检查文件SHA256
             var fileStream = model.File.OpenReadStream();
-            if (fileStream.CanSeek)
-            {
-                fileStream.Position = 0;
-            }
-            string fileSha256 = "sha256-" + await _fileRepository.GetFileSha256Async(fileStream);
-            if (!fileSha256.Equals(packageInfo.Integrity, StringComparison.InvariantCultureIgnoreCase))
+
+            if (!await _fileRepository.CheckFileIntegrityAsync(fileStream, packageInfo.Integrity))
             {
                 return BadRequest(
-                    new ApiResponse<object?>(StatusCodes.Status400BadRequest, "文件的 SHA256 校验失败", null)
+                    new ApiResponse<object?>(StatusCodes.Status400BadRequest, "文件的哈希校验失败", null)
                 );
             }
+
             int? id = await _packageRepository.GetNextIdAsync();
             if (id is null)
             {
@@ -205,18 +194,39 @@ public sealed class PackagesController : ControllerBase
             await _packageRepository.AddPackageAsync(package);
             await _fileRepository.SaveFileAsync(version.Tarball, fileStream);
 
-            return CreatedAtAction(
-                nameof(GetPackage),
-                new { packageId = package.Id, packageNormalizedName = package.NormalizedName },
-                new ApiResponse<Package>(StatusCodes.Status201Created, "包上传成功", package)
+            package = await _packageRepository.GetPackageAsync(package.Id, HttpContext.RequestAborted);
+
+            return StatusCode(
+                StatusCodes.Status201Created,
+                new ApiResponse<Package>(StatusCodes.Status201Created, "创建成功", package)
             );
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new ApiResponse<object?>(StatusCodes.Status400BadRequest, ex.Message, null));
         }
         catch (DbUpdateException ex)
         {
-            return StatusCode(StatusCodes.Status500InternalServerError, $"数据库错误: {ex.Message}");
+            if (ex.InnerException is PostgresException { SqlState: "23505" })
+            {
+                return BadRequest(
+                    new ApiResponse<object?>(
+                        StatusCodes.Status400BadRequest,
+                        "创建失败: 相同规范化名称的包已存在",
+                        null
+                    )
+                );
+            }
+
+            _logger.ZLogError(ex, $"创建包时发生数据库错误");
+            return StatusCode(
+                StatusCodes.Status500InternalServerError,
+                $"数据库错误: {ex.Message}" + ex.Entries
+            );
         }
         catch (IOException ex)
         {
+            _logger.ZLogError(ex, $"创建包时发生文件存储错误");
             return StatusCode(StatusCodes.Status500InternalServerError, $"文件存储错误: {ex.Message}");
         }
         catch (KeyNotFoundException ex)
@@ -225,13 +235,7 @@ public sealed class PackagesController : ControllerBase
         }
         catch (JsonException ex)
         {
-            return BadRequest(
-                new ApiResponse<object?>(
-                    StatusCodes.Status400BadRequest,
-                    $"Invalid JSON format: {ex.Message}",
-                    null
-                )
-            );
+            return BadRequest(new ApiResponse<object?>(StatusCodes.Status400BadRequest, ex.Message, null));
         }
         catch (Exception ex)
         {

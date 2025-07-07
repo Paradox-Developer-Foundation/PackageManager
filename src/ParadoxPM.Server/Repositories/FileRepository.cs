@@ -61,6 +61,16 @@ public sealed class FileRepository : IFileRepository
         return Convert.ToHexString(hashBytes).ToLowerInvariant();
     }
 
+    public async Task<bool> CheckFileIntegrityAsync(Stream fileStream, string expectedSha256)
+    {
+        if (fileStream.CanSeek)
+        {
+            fileStream.Position = 0;
+        }
+        string fileSha256 = "sha256-" + await GetFileSha256Async(fileStream);
+        return fileSha256.Equals(expectedSha256, StringComparison.InvariantCultureIgnoreCase);
+    }
+
     public async Task SaveFileAsync(string path, Stream fileStream)
     {
         if (fileStream.CanSeek)

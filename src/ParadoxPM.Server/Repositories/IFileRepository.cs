@@ -7,4 +7,5 @@ public interface IFileRepository
     Task<Stream> UpdateFileAsync(string path, Stream fileStream);
     Task SaveFileAsync(string path, Stream fileStream);
     Task<string> GetFileSha256Async(Stream fileStream);
+    Task<bool> CheckFileIntegrityAsync(Stream fileStream, string expectedSha256);
 }

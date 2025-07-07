@@ -68,8 +68,17 @@ public sealed class PackageRepository : IPackageRepository
             if (
                 !await _context
                     .Packages.AsNoTracking()
-                    .Select(p => new { p.Id, p.NormalizedName })
-                    .AnyAsync(x => x.Id == dependency.Id && x.NormalizedName == dependency.NormalizedName)
+                    .Select(p => new
+                    {
+                        p.Id,
+                        p.NormalizedName,
+                        p.Name,
+                    })
+                    .AnyAsync(x =>
+                        x.Id == dependency.Id
+                        && x.NormalizedName == dependency.NormalizedName
+                        && x.Name == dependency.Name
+                    )
             )
             {
                 return false;
