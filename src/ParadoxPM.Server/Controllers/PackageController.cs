@@ -292,9 +292,9 @@ public sealed class PackagesController : ControllerBase
     }
 
     // 下载指定的包
-    // GET: api/packages/download/{normalizedName}/{version}
-    [HttpGet("download/{id}/{version}")]
-    public async Task<IActionResult> DownloadPackage(string id, string version)
+    // GET: api/packages/download/{id}/{version}
+    [HttpGet("download/{id:int}/{version}")]
+    public async Task<IActionResult> DownloadPackage(int id, string version)
     {
         try
         {
