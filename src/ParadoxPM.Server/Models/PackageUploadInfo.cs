@@ -70,7 +70,7 @@ public sealed partial class PackageUploadInfo
         "csl2"
     );
 
-    public void ValidCheck()
+    public bool IsValid(out string errorMessage)
     {
         var errorList = new List<string>();
 
@@ -119,7 +119,10 @@ public sealed partial class PackageUploadInfo
         }
         if (errorMessages.Length > 0)
         {
-            throw new ArgumentException("上传信息格式错误: " + errorMessages);
+            errorMessage = errorMessages;
+            return false;
         }
+        errorMessage = string.Empty;
+        return true;
     }
 }

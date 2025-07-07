@@ -67,7 +67,7 @@ public sealed class FileRepository : IFileRepository
         {
             fileStream.Position = 0;
         }
-        string fileSha256 = "sha256-" + await GetFileSha256Async(fileStream);
+        string fileSha256 = $"sha256-{await GetFileSha256Async(fileStream)}";
         return fileSha256.Equals(expectedSha256, StringComparison.InvariantCultureIgnoreCase);
     }
 

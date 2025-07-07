@@ -70,7 +70,7 @@ public sealed class PackagesController : ControllerBase
     [HttpGet("query/search")]
     public async Task<ActionResult<ApiResponse<IEnumerable<Package>>>> SearchPackage(
         [FromQuery] string keyword,
-        [FromQuery] string? arch = null
+        [FromQuery] string? arch
     )
     {
         try
@@ -130,8 +130,12 @@ public sealed class PackagesController : ControllerBase
                     new ApiResponse<object?>(StatusCodes.Status400BadRequest, "无效的包 JSON 信息", null)
                 );
             }
-
-            packageInfo.ValidCheck();
+            if (!packageInfo.IsValid(out string errorMessage))
+            {
+                return BadRequest(
+                    new ApiResponse<object?>(StatusCodes.Status400BadRequest, errorMessage, null)
+                );
+            }
 
             var dependencyList = packageInfo.Dependencies;
 
@@ -163,7 +167,7 @@ public sealed class PackagesController : ControllerBase
             {
                 Version = packageInfo.Version,
                 Integrity = packageInfo.Integrity,
-                Tarball = $"{id.Value}-{packageInfo.NormalizedName}-{packageInfo.Version}.7z",
+                Tarball = $"{packageInfo.NormalizedName}-{packageInfo.Version}.7z",
                 UploadTime = DateTime.UtcNow,
                 DownloadCount = 0,
                 Dependencies = dependencyList
@@ -194,7 +198,10 @@ public sealed class PackagesController : ControllerBase
             };
 
             await _packageRepository.AddPackageAsync(package);
-            await _fileRepository.SaveFileAsync(version.Tarball, fileStream);
+            await _fileRepository.SaveFileAsync(
+                $"{package.NormalizedName}/{version.Version}/{version.Tarball}",
+                fileStream
+            );
 
             package = await _packageRepository.GetPackageAsync(package.Id, HttpContext.RequestAborted);
 
@@ -221,7 +228,7 @@ public sealed class PackagesController : ControllerBase
             }
 
             _logger.ZLogError(ex, $"创建包时发生数据库错误");
-            var entryDetails = ex.Entries != null ? JsonSerializer.Serialize(ex.Entries) : "无详细信息";
+            string entryDetails = JsonSerializer.Serialize(ex.Entries);
             return StatusCode(
                 StatusCodes.Status500InternalServerError,
                 $"数据库错误: {ex.Message}. 详细信息: {entryDetails}"
@@ -243,7 +250,10 @@ public sealed class PackagesController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "上传文件时发生错误");
-            return StatusCode(StatusCodes.Status500InternalServerError, "内部错误");
+            return StatusCode(
+                StatusCodes.Status500InternalServerError,
+                new ApiResponse<object?>(StatusCodes.Status500InternalServerError, "内部错误", null)
+            );
         }
     }
 
@@ -282,12 +292,13 @@ public sealed class PackagesController : ControllerBase
     }
 
     // 下载指定的包
-    // GET: api/packages/download/{tarball}
-    [HttpGet("download/{tarball}")]
-    public async Task<IActionResult> DownloadPackage(string tarball)
+    // GET: api/packages/download/{normalizedName}/{version}
+    [HttpGet("download/{normalizedName}/{version}")]
+    public async Task<IActionResult> DownloadPackage(string normalizedName, string version)
     {
         try
         {
+            string tarball = $"{normalizedName}/{version}/{normalizedName}-{version}.7z";
             var fileStream = await _fileRepository.GetFileAsync(tarball);
             return File(fileStream, "application/x-7z-compressed", tarball);
         }
@@ -297,13 +308,22 @@ public sealed class PackagesController : ControllerBase
         }
         catch (IOException ex)
         {
-            _logger.ZLogError(ex, $"下载包时发生文件错误, Tarball: {tarball}");
+            _logger.ZLogError(
+                ex,
+                $"下载包时发生文件错误, normalizedName: {normalizedName}, version: {version}"
+            );
             return StatusCode(StatusCodes.Status500InternalServerError, "文件读取错误");
         }
         catch (Exception ex)
         {
-            _logger.ZLogError(ex, $"下载包时发生未知错误, Tarball: {tarball}");
-            return StatusCode(StatusCodes.Status500InternalServerError, "内部错误");
+            _logger.ZLogError(
+                ex,
+                $"下载包时发生未知错误, normalizedName: {normalizedName}, version: {version}"
+            );
+            return StatusCode(
+                StatusCodes.Status500InternalServerError,
+                new ApiResponse<object?>(StatusCodes.Status500InternalServerError, "内部错误", null)
+            );
         }
     }
 }

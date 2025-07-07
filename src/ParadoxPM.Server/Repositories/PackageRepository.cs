@@ -40,7 +40,7 @@ public sealed class PackageRepository : IPackageRepository
                 (
                     EF.Functions.Like(p.Name.ToLower(), pattern)
                     || EF.Functions.Like(p.NormalizedName.ToLower(), pattern)
-                    || EF.Functions.Like(p.Description.ToLower(), pattern)
+                    || (p.Description == null || EF.Functions.Like(p.Description.ToLower(), pattern))
                 ) && (arch == null || p.Arch == arch)
             )
             .ToListAsync(token);
