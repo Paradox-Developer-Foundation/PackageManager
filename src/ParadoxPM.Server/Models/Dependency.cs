@@ -12,6 +12,10 @@ public sealed class Dependency
 
     [Required]
     public required int DependencyId { get; set; }
+    
+    [Required]
+    [StringLength(100)]
+    public required string Name { get; set; }
 
     [Required]
     [StringLength(100)]
