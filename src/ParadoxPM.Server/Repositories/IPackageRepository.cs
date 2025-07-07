@@ -4,13 +4,13 @@ namespace ParadoxPM.Server.Repositories;
 
 public interface IPackageRepository
 {
-    /// <summary>
-    /// 获取所有的包
-    /// </summary>
-    /// <param name="isActiveOnly">是否只获取启用的包</param>
-    /// <param name="token">取消令牌</param>
-    /// <returns>包的枚举器</returns>
-    Task<IEnumerable<Package>> GetPackagesAsync(bool isActiveOnly, CancellationToken token);
+    // /// <summary>
+    // /// 获取所有的包
+    // /// </summary>
+    // /// <param name="isActiveOnly">是否只获取启用的包</param>
+    // /// <param name="token">取消令牌</param>
+    // /// <returns>包的枚举器</returns>
+    // Task<IEnumerable<Package>> GetPackagesAsync(bool isActiveOnly, CancellationToken token);
 
     /// <summary>
     /// 获取指定的包
@@ -20,6 +20,15 @@ public interface IPackageRepository
     /// <exception cref="KeyNotFoundException">未找到符合要求的包时抛出</exception>
     /// <returns>包</returns>
     Task<Package> GetPackageAsync(int packageId, CancellationToken token);
+
+    /// <summary>
+    /// 查询合适的包
+    /// </summary>
+    /// <param name="keyword">关键词</param>
+    /// <param name="arch">游戏类型</param>
+    /// <param name="token">取消令牌</param>
+    /// <returns>包列表</returns>
+    Task<IEnumerable<Package>> SearchPackageAsync(string keyword, string? arch, CancellationToken token);
 
     /// <summary>
     /// 检查所有依赖项是否有效

@@ -6,6 +6,10 @@ public sealed class PackageUploadDependencyInfo
 {
     [Required]
     public required int Id { get; set; }
+    
+    [Required]
+    [StringLength(100)]
+    public required string Name { get; set; }
 
     [Required]
     [StringLength(100)]
