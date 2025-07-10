@@ -1,0 +1,74 @@
+{
+  "name": "paradoxpm",
+  "displayName": "ParadoxPM",
+  "description": "",
+  "version": "0.0.1",
+  "license": "Apache-2.0",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "author": "Paradox Developer Foundation",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Paradox-Developer-Foundation/PackageManager"
+  },
+  "preview": true,
+  "type": "module",
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./dist/extension/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "ParadoxPM-Server.helloWorld",
+        "title": "Hello World"
+      }
+    ],
+    "viewsContainers": {
+      "panel": [
+        {
+          "id": "packages-manager",
+          "title": "Packages Manager",
+          "icon": "$(search-editor-label-icon)"
+        }
+      ]
+    },
+    "views": {
+      "packages-manager": [
+        {
+          "id": "packages-manager",
+          "name": "Packages Manager",
+          "icon": "$(package)",
+          "type": "webview"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "pnpm run build",
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "pretest": "pnpm run compile-tests && pnpm run compile && pnpm run lint",
+    "lint": "eslint src"
+  },
+  "devDependencies": {
+    "@tomjs/vite-plugin-vscode": "^4.2.1",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "~20.19.4",
+    "@types/vscode": "^1.90.0",
+    "@typescript-eslint/eslint-plugin": "^8.35.1",
+    "@typescript-eslint/parser": "^8.35.1",
+    "@vitejs/plugin-vue": "^6.0.0",
+    "eslint": "^9.30.1",
+    "typescript": "^5.8.3",
+    "vite": "npm:rolldown-vite@latest",
+    "vue-tsc": "^3.0.0"
+  },
+  "dependencies": {
+    "@vscode-elements/elements": "^1.17.0",
+    "@vscode/codicons": "^0.0.36",
+    "vue": "^3.5.17"
+  }
+}

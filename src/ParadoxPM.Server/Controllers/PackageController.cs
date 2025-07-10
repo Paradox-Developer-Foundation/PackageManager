@@ -41,6 +41,8 @@ public sealed class PackagesController : ControllerBase
     [HttpGet("query/{packageId:int}/meta")]
     public async Task<ActionResult<ApiResponse<Package>>> GetPackage(int packageId)
     {
+        _logger.ZLogDebug($"ip: {HttpContext.Connection.RemoteIpAddress} 请求获取所有包");
+
         try
         {
             var package = await _packageRepository.GetPackageAsync(packageId, HttpContext.RequestAborted);
