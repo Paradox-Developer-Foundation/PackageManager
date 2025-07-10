@@ -19,7 +19,7 @@
             <div v-if="package.versions[selectedIndex]?.dependencies && package.versions[selectedIndex].dependencies.length > 0">
                 <h2>依赖</h2>
                 <p v-for="(dependency, index) in package.versions[selectedIndex].dependencies" :key="index">
-                    {{ dependency.normalizedName }} >= {{ dependency.minVersion }}
+                    {{ dependency.name }} >= {{ dependency.minVersion }}
                 </p>
             </div>
             <h2 v-else>

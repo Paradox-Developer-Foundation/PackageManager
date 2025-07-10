@@ -105,5 +105,9 @@ export interface Dependency {
      * 规范化名称
      */
     normalizedName: string;
+    /**
+     * 名称
+     */
+    name: string;
     [property: string]: any;
 }

@@ -2,7 +2,7 @@
     <div class="container">
         <div class="left-panel">
             <div class="search-header">
-                <vscode-textfield class="search-box" placeholder="搜索包...">
+                <vscode-textfield class="search-box" placeholder="搜索包..." v-model="searchKeyword" @input="fetchPackages">
                     <vscode-icon slot="content-before" name="search" title="search"></vscode-icon>
                 </vscode-textfield>
             </div>
@@ -32,6 +32,7 @@ import PackageDetails from "./PackageDetails.vue";
 
 const packages = ref<PackageInfo[]>([]);
 const selectedPackage = ref<PackageInfo | null>(null);
+const searchKeyword = ref<string>("");
 
 onMounted(() => {
     fetchPackages();
@@ -39,14 +40,14 @@ onMounted(() => {
 
 const fetchPackages = async (): Promise<void> => {
     try {
-        const response = await fetch("https://localhost:7295/api/packages", {
+        const response = await fetch(`https://localhost:7295/api/packages/query/search?keyword=${searchKeyword.value}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
             },
         });
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(`HTTP error! status: ${response.status} response: ${await response.text()}`);
         }
 
         const result: ApiResponse<PackageInfo[]> = await response.json();
