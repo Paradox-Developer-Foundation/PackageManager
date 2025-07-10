@@ -24,12 +24,14 @@ builder.Services.AddCors(options =>
         "AllowVueApp",
         policy =>
         {
+            #if DEBUG
             policy
                 // Vue 开发服务器地址
                 .WithOrigins("http://localhost:5173")
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();
+            #endif
         }
     );
 });
