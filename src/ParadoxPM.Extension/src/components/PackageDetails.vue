@@ -3,7 +3,7 @@
         <div class="package-details-header">
             <p>版本</p>
             <vscode-single-select :selectedIndex="selectedIndex">
-                <vscode-option v-for="version in package?.versions">{{ version.version }}</vscode-option>
+                <vscode-option v-for="version in package?.versions" :key="version.version">{{ version.version }}</vscode-option>
             </vscode-single-select>
         </div>
         <div v-if="package" class="package-details-content">
