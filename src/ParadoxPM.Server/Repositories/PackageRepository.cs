@@ -36,6 +36,8 @@ public sealed class PackageRepository : IPackageRepository
         string pattern = $"%{keyword.ToLower()}%";
         var packages = await _context
             .Packages.AsNoTracking()
+            .Include(p => p.Versions)
+            .ThenInclude(v => v.Dependencies)
             .Where(p =>
                 (
                     EF.Functions.Like(p.Name.ToLower(), pattern)
